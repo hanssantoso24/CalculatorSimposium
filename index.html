@@ -112,31 +112,19 @@
         h("div", { style: { padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 } },
           h("div", null,
             h(Section, { title: "Peserta Thailand non-panitia (venue disubsidi KBRI)", accent: "blue" },
-              h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 } },
-                h("div", null,
-                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Durasi"),
-                  h("div", null,
-                    h("div", { style: { fontSize: 12, padding: "4px 0" } }, "1 hari"),
-                    h("div", { style: { fontSize: 12, padding: "4px 0" } }, "2 hari"),
-                    h("div", { style: { fontSize: 12, padding: "4px 0" } }, "3 hari")
-                  )
-                ),
-                h("div", null,
-                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Jumlah"),
-                  h("div", null,
-                    h("input", { type: "number", min: "0", value: t1n, onChange: e => setT1n(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
-                    h("input", { type: "number", min: "0", value: t2n, onChange: e => setT2n(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
-                    h("input", { type: "number", min: "0", value: t3n, onChange: e => setT3n(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12 } })
-                  )
-                ),
-                h("div", null,
-                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Harga tiket"),
-                  h("div", null,
-                    h("input", { type: "number", min: "0", value: t1p, onChange: e => setT1p(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
-                    h("input", { type: "number", min: "0", value: t2p, onChange: e => setT2p(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
-                    h("input", { type: "number", min: "0", value: t3p, onChange: e => setT3p(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12 } })
-                  )
-                )
+              h("div", { style: { display: "grid", gridTemplateColumns: "80px 1fr 1fr", gap: 12, alignItems: "flex-end" } },
+                h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", fontWeight: 500, marginBottom: 4 } }, "Durasi"),
+                h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", fontWeight: 500, marginBottom: 4 } }, "Jumlah"),
+                h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", fontWeight: 500, marginBottom: 4 } }, "Harga tiket"),
+                h("div", { style: { fontSize: 12, padding: "4px 0" } }, "1 hari"),
+                h("input", { type: "number", min: "0", value: t1n, onChange: e => setT1n(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, padding: "6px 8px" } }),
+                h("input", { type: "number", min: "0", value: t1p, onChange: e => setT1p(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, padding: "6px 8px" } }),
+                h("div", { style: { fontSize: 12, padding: "4px 0" } }, "2 hari"),
+                h("input", { type: "number", min: "0", value: t2n, onChange: e => setT2n(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, padding: "6px 8px" } }),
+                h("input", { type: "number", min: "0", value: t2p, onChange: e => setT2p(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, padding: "6px 8px" } }),
+                h("div", { style: { fontSize: 12, padding: "4px 0" } }, "3 hari"),
+                h("input", { type: "number", min: "0", value: t3n, onChange: e => setT3n(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, padding: "6px 8px" } }),
+                h("input", { type: "number", min: "0", value: t3p, onChange: e => setT3p(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, padding: "6px 8px" } })
               )
             ),
             h(Section, { title: "Biaya operasional", accent: "amber" },

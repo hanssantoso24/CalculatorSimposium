@@ -351,7 +351,7 @@
                 h("span", null, "฿" + formatCurrency(c.totalCost))
               ),
               h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, padding: "10px 12px", borderRadius: "var(--border-radius-md)", background: isDeficit ? "#FCEBEB" : "#EAF3DE", color: isDeficit ? "#791F1F" : "#27500A" } },
-                h("span", null, "Nilai akhir"),
+                h("span", null, "Nilai akhir " + (isDeficit ? "DEFISIT" : "SURPLUS")),
                 h("span", null, isDeficit ? "- ฿" + formatCurrency(c.totalSurplus) : "+ ฿" + formatCurrency(c.totalSurplus))
               )
             )

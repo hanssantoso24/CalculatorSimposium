@@ -28,7 +28,7 @@
 
     @media (max-width: 768px) {
       body { padding: 0 8px; }
-      input[type="number"] { padding: 8px 6px; font-size: 16px; }
+      input[type="number"] { padding: 8px 6px; font-size: 16px; max-width: 120px; width: auto !important; }
       [style*="gridTemplateColumns"] { grid-template-columns: 1fr !important; }
       [style*="display: grid"] { grid-template-columns: 1fr !important; }
       [style*="display: flex"][style*="gap"] { flex-direction: column; }
@@ -37,7 +37,7 @@
 
     @media (max-width: 480px) {
       body { padding: 0 4px; }
-      input[type="number"] { padding: 8px 4px; font-size: 16px; }
+      input[type="number"] { padding: 8px 4px; font-size: 16px; max-width: 100px; width: auto !important; }
       [style*="fontSize: 16"] { font-size: 14px !important; }
       [style*="fontSize: 14"] { font-size: 13px !important; }
       [style*="padding: 12px 14px"] { padding: 8px 10px !important; }

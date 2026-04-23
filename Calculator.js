@@ -1,23 +1,32 @@
 import { useState, useMemo } from "react";
 
-const f = (n) => Math.round(Math.abs(n)).toLocaleString("id-ID");
+// Format number to Indonesian locale (Baht currency)
+const formatCurrency = (n) => Math.round(Math.abs(n)).toLocaleString("id-ID");
 
 function Field({ label, value, onChange, suffix = "Baht", small }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-      <label style={{ fontSize: small ? 12 : 13, color: "var(--color-text-secondary)", flex: 1 }}>{label}</label>
+      <label style={{ fontSize: small ? 12 : 13, color: "var(--color-text-secondary)", flex: 1 }}>
+        {label}
+      </label>
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <input type="number" min="0" value={value}
+        <input
+          type="number"
+          min="0"
+          value={value}
           onChange={e => onChange(Math.max(0, Number(e.target.value) || 0))}
-          style={{ width: 80, textAlign: "right", fontSize: 13 }} />
-        <span style={{ fontSize: 11, color: "var(--color-text-tertiary)", width: 30 }}>{suffix}</span>
+          style={{ width: 80, textAlign: "right", fontSize: 13 }}
+        />
+        <span style={{ fontSize: 11, color: "var(--color-text-tertiary)", width: 30 }}>
+          {suffix}
+        </span>
       </div>
     </div>
   );
 }
 
 function Section({ title, accent, children }) {
-  const colors = {
+  const accentColors = {
     blue: { bg: "#E6F1FB", border: "#378ADD", text: "#0C447C" },
     green: { bg: "#EAF3DE", border: "#639922", text: "#3B6D11" },
     amber: { bg: "#FAEEDA", border: "#BA7517", text: "#854F0B" },
@@ -26,70 +35,148 @@ function Section({ title, accent, children }) {
     red: { bg: "#FCEBEB", border: "#E24B4A", text: "#A32D2D" },
     purple: { bg: "#EEEDFE", border: "#7F77DD", text: "#3C3489" },
   };
-  const c = colors[accent] || colors.blue;
+  const color = accentColors[accent] || accentColors.blue;
+
   return (
-    <div style={{
-      background: "var(--color-background-primary)",
-      border: "0.5px solid var(--color-border-tertiary)",
-      borderRadius: "var(--border-radius-lg)",
-      marginBottom: 12,
-      overflow: "hidden"
-    }}>
-      <div style={{
-        background: c.bg, borderBottom: `0.5px solid ${c.border}`,
-        padding: "8px 14px", fontSize: 13, fontWeight: 500, color: c.text
-      }}>{title}</div>
-      <div style={{ padding: "12px 14px" }}>{children}</div>
+    <div
+      style={{
+        background: "var(--color-background-primary)",
+        border: "0.5px solid var(--color-border-tertiary)",
+        borderRadius: "var(--border-radius-lg)",
+        marginBottom: 12,
+        overflow: "hidden"
+      }}
+    >
+      <div
+        style={{
+          background: color.bg,
+          borderBottom: `0.5px solid ${color.border}`,
+          padding: "8px 14px",
+          fontSize: 13,
+          fontWeight: 500,
+          color: color.text
+        }}
+      >
+        {title}
+      </div>
+      <div style={{ padding: "12px 14px" }}>
+        {children}
+      </div>
     </div>
   );
 }
 
 function Row({ label, sub, right, bold, accent }) {
   return (
-    <div style={{
-      display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-      padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)",
-      background: accent ? "var(--color-background-secondary)" : "transparent"
-    }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        padding: "5px 0",
+        borderBottom: "0.5px solid var(--color-border-tertiary)",
+        background: accent ? "var(--color-background-secondary)" : "transparent"
+      }}
+    >
       <div>
-        <div style={{ fontSize: 13, color: bold ? "var(--color-text-primary)" : "var(--color-text-secondary)", fontWeight: bold ? 500 : 400 }}>{label}</div>
-        {sub && <div style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>{sub}</div>}
+        <div
+          style={{
+            fontSize: 13,
+            color: bold ? "var(--color-text-primary)" : "var(--color-text-secondary)",
+            fontWeight: bold ? 500 : 400
+          }}
+        >
+          {label}
+        </div>
+        {sub && (
+          <div style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>
+            {sub}
+          </div>
+        )}
       </div>
-      <div style={{ fontSize: 13, fontWeight: bold ? 500 : 400, color: "var(--color-text-primary)", marginLeft: 8 }}>{right}</div>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: bold ? 500 : 400,
+          color: "var(--color-text-primary)",
+          marginLeft: 8
+        }}
+      >
+        {right}
+      </div>
     </div>
   );
 }
 
 function MetricCard({ label, value, color }) {
-  const colors = {
+  const cardColors = {
     green: { bg: "#EAF3DE", text: "#3B6D11", val: "#27500A" },
     red: { bg: "#FCEBEB", text: "#A32D2D", val: "#791F1F" },
     blue: { bg: "#E6F1FB", text: "#185FA5", val: "#0C447C" },
     amber: { bg: "#FAEEDA", text: "#854F0B", val: "#633806" },
     teal: { bg: "#E1F5EE", text: "#0F6E56", val: "#085041" },
   };
-  const c = colors[color] || colors.blue;
+  const cardColor = cardColors[color] || cardColors.blue;
+
   return (
-    <div style={{ background: c.bg, borderRadius: "var(--border-radius-md)", padding: "10px 14px", textAlign: "center" }}>
-      <div style={{ fontSize: 11, color: c.text, marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 20, fontWeight: 500, color: c.val }}>{value}</div>
+    <div
+      style={{
+        background: cardColor.bg,
+        borderRadius: "var(--border-radius-md)",
+        padding: "10px 14px",
+        textAlign: "center"
+      }}
+    >
+      <div style={{ fontSize: 11, color: cardColor.text, marginBottom: 4 }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 20, fontWeight: 500, color: cardColor.val }}>
+        {value}
+      </div>
     </div>
   );
 }
 
 export default function App() {
-  const [t1n, setT1n] = useState(20); const [t1p, setT1p] = useState(1000); const [t1c, setT1c] = useState(400);
-  const [t2n, setT2n] = useState(5);  const [t2p, setT2p] = useState(1400); const [t2c, setT2c] = useState(800);
-  const [t3n, setT3n] = useState(5);  const [t3p, setT3p] = useState(3150); const [t3c, setT3c] = useState(1200);
+  // Thailand participants (by duration)
+  const [t1n, setT1n] = useState(20);
+  const [t1p, setT1p] = useState(1000);
+  const [t1c, setT1c] = useState(400);
+  const [t2n, setT2n] = useState(5);
+  const [t2p, setT2p] = useState(1400);
+  const [t2c, setT2c] = useState(800);
+  const [t3n, setT3n] = useState(5);
+  const [t3p, setT3p] = useState(3150);
+  const [t3c, setT3c] = useState(1200);
   const [cityTour, setCityTour] = useState(1350);
-  const [yn, setYn] = useState(20);   const [yp, setYp] = useState(4000);
-  const [pthn, setPthn] = useState(17); const [pthp, setPthp] = useState(4000);
-  const [pnonn, setPnonn] = useState(23); const [pnonp, setPnonp] = useState(4000);
+
+  // Non-Thailand participants
+  const [yn, setYn] = useState(20);
+  const [yp, setYp] = useState(4000);
+
+  // Committee members
+  const [pthn, setPthn] = useState(17);
+  const [pthp, setPthp] = useState(4000);
+  const [pnonn, setPnonn] = useState(23);
+  const [pnonp, setPnonp] = useState(4000);
   const [pReg, setPReg] = useState(44);
-  const [kbriQ, setKbriQ] = useState(70); const [kbriV, setKbriV] = useState(850);
-  const [hotelPPN, setHotelPPN] = useState(700); const [hotelN, setHotelN] = useState(4); const [hotelCap, setHotelCap] = useState(2);
-  const [souvP, setSouvP] = useState(400); const [souvN, setSouvN] = useState(44);
-  const [contPP, setContPP] = useState(600); const [contUsage, setContUsage] = useState(0);
+
+  // KBRI subsidy (venue)
+  const [kbriQ, setKbriQ] = useState(70);
+  const [kbriV, setKbriV] = useState(850);
+
+  // Hotel and accommodations
+  const [hotelPPN, setHotelPPN] = useState(700);
+  const [hotelN, setHotelN] = useState(4);
+  const [hotelCap, setHotelCap] = useState(2);
+
+  // Souvenirs
+  const [souvP, setSouvP] = useState(400);
+  const [souvN, setSouvN] = useState(44);
+
+  // Contingency
+  const [contPP, setContPP] = useState(600);
+  const [contUsage, setContUsage] = useState(0);
 
   const c = useMemo(() => {
     const tTotal = t1n + t2n + t3n;
@@ -149,11 +236,26 @@ export default function App() {
   const isOpsDeficit = c.operationalSurplus < 0;
 
   return (
-    <div style={{ fontFamily: "var(--font-sans)", background: "var(--color-background-tertiary)", minHeight: "100vh" }}>
-
-      <div style={{ background: "var(--color-background-primary)", borderBottom: "0.5px solid var(--color-border-tertiary)", padding: "12px 20px" }}>
-        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--color-text-primary)" }}>Kalkulator Anggaran Simposium</div>
-        <div style={{ fontSize: 12, color: "var(--color-text-tertiary)" }}>PPIDK Asia Oceania 2026 · PERMITHA · semua nilai dapat diubah</div>
+    <div
+      style={{
+        fontFamily: "var(--font-sans)",
+        background: "var(--color-background-tertiary)",
+        minHeight: "100vh"
+      }}
+    >
+      <div
+        style={{
+          background: "var(--color-background-primary)",
+          borderBottom: "0.5px solid var(--color-border-tertiary)",
+          padding: "12px 20px"
+        }}
+      >
+        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--color-text-primary)" }}>
+          Kalkulator Anggaran Simposium
+        </div>
+        <div style={{ fontSize: 12, color: "var(--color-text-tertiary)" }}>
+          PPIDK Asia Oceania 2026 · PERMITHA · semua nilai dapat diubah
+        </div>
       </div>
 
       <div style={{
@@ -162,9 +264,9 @@ export default function App() {
         display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12
       }}>
         {[
-          { label: "Surplus akhir", value: `${isDeficit ? "- " : "+ "}฿${f(c.totalSurplus)}`, big: true },
-          { label: "Surplus operasional", value: `${isOpsDeficit ? "- " : "+ "}฿${f(c.operationalSurplus)}` },
-          { label: "Contingency tidak terpakai", value: `+ ฿${f(c.contUnused)}` },
+          { label: "Surplus akhir", value: `${isDeficit ? "- " : "+ "}฿${formatCurrency(c.totalSurplus)}`, big: true },
+          { label: "Surplus operasional", value: `${isOpsDeficit ? "- " : "+ "}฿${formatCurrency(c.operationalSurplus)}` },
+          { label: "Contingency tidak terpakai", value: `+ ฿${formatCurrency(c.contUnused)}` },
         ].map(({ label, value, big }) => (
           <div key={label} style={{ textAlign: "center" }}>
             <div style={{ fontSize: 11, color: isDeficit ? "#F7C1C1" : "#C0DD97", marginBottom: 2 }}>{label}</div>
@@ -249,7 +351,7 @@ export default function App() {
               <div>Dipakai Thai non-panitia: <b>{c.tTotal}</b> + Panitia Thai: <b>{pthn}</b> = <b>{c.usedByThai}</b></div>
               <div style={{ marginTop: 4 }}>Sisa → Panitia non-Thai: <b>{c.pnonGratis}</b> gratis, <b>{c.pnonBayarVenue}</b> bayar venue</div>
               <div style={{ marginTop: 4, color: c.kuotaHangus > 0 ? "#A32D2D" : "#3B6D11" }}>
-                Kuota hangus: <b>{c.kuotaHangus}</b> pax  |  Total subsidi: <b>฿{f(c.subsidiTotal)}</b>
+                Kuota hangus: <b>{c.kuotaHangus}</b> pax  |  Total subsidi: <b>฿{formatCurrency(c.subsidiTotal)}</b>
               </div>
             </div>
           </Section>
@@ -268,7 +370,7 @@ export default function App() {
               ))}
             </div>
             <div style={{ background: "#E1F5EE", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "#0F6E56" }}>
-              <b>{c.rooms} kamar</b> × ฿{f(hotelPPN)} × {hotelN} malam = <b>฿{f(c.hotelCost)}</b>
+              <b>{c.rooms} kamar</b> × ฿{formatCurrency(hotelPPN)} × {hotelN} malam = <b>฿{formatCurrency(c.hotelCost)}</b>
             </div>
           </Section>
 
@@ -276,7 +378,7 @@ export default function App() {
             <Field label="Harga per orang" value={souvP} onChange={setSouvP} />
             <Field label="Jumlah penerima" value={souvN} onChange={setSouvN} suffix="org" />
             <div style={{ background: "#FBEAF0", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "#993556" }}>
-              {souvN} × ฿{f(souvP)} = <b>฿{f(c.souvCost)}</b>
+              {souvN} × ฿{formatCurrency(souvP)} = <b>฿{formatCurrency(c.souvCost)}</b>
             </div>
           </Section>
 
@@ -285,7 +387,7 @@ export default function App() {
             <div style={{ marginTop: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>Persentase digunakan</span>
-                <span style={{ fontSize: 13, fontWeight: 500, color: "#A32D2D" }}>{contUsage}% = ฿{f(c.contUsed)}</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: "#A32D2D" }}>{contUsage}% = ฿{formatCurrency(c.contUsed)}</span>
               </div>
               <input type="range" min="0" max="100" step="5" value={contUsage} onChange={e => setContUsage(+e.target.value)} style={{ width: "100%" }} />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--color-text-tertiary)", marginTop: 2 }}>
@@ -293,8 +395,8 @@ export default function App() {
               </div>
             </div>
             <div style={{ background: "#FCEBEB", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "#A32D2D", marginTop: 10 }}>
-              <div>Terkumpul: {c.totalPaying} pax × ฿{contPP} = <b>฿{f(c.contCollected)}</b></div>
-              <div style={{ marginTop: 3 }}>Terpakai: <b>฿{f(c.contUsed)}</b>  |  Tidak terpakai: <b>฿{f(c.contUnused)}</b></div>
+              <div>Terkumpul: {c.totalPaying} pax × ฿{contPP} = <b>฿{formatCurrency(c.contCollected)}</b></div>
+              <div style={{ marginTop: 3 }}>Terpakai: <b>฿{formatCurrency(c.contUsed)}</b>  |  Tidak terpakai: <b>฿{formatCurrency(c.contUnused)}</b></div>
             </div>
           </Section>
         </div>
@@ -302,8 +404,8 @@ export default function App() {
         <div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 }}>
             <MetricCard label="Total peserta" value={c.totalPaying + " org"} color={isDeficit ? "red" : "teal"} />
-            <MetricCard label="Total pendapatan" value={"฿" + f(c.revenue)} color="blue" />
-            <MetricCard label="Total pengeluaran" value={"฿" + f(c.totalCost)} color="amber" />
+            <MetricCard label="Total pendapatan" value={"฿" + formatCurrency(c.revenue)} color="blue" />
+            <MetricCard label="Total pengeluaran" value={"฿" + formatCurrency(c.totalCost)} color="amber" />
           </div>
 
           <Section title="Rincian pendapatan" accent="green">
@@ -318,27 +420,27 @@ export default function App() {
               <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" }}>
                 <div>
                   <div style={{ fontSize: 13, color: "var(--color-text-primary)" }}>{label}</div>
-                  <div style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>{n} org × ฿{f(p)}  ·  margin ฿{f(marg)}/org</div>
+                  <div style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>{n} org × ฿{formatCurrency(p)}  ·  margin ฿{formatCurrency(marg)}/org</div>
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>฿{f(rev)}</div>
+                <div style={{ fontSize: 13, fontWeight: 500 }}>฿{formatCurrency(rev)}</div>
               </div>
             ))}
             <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 8, fontWeight: 500, fontSize: 14, color: "#3B6D11" }}>
-              <span>Total pendapatan</span><span>฿{f(c.revenue)}</span>
+              <span>Total pendapatan</span><span>฿{formatCurrency(c.revenue)}</span>
             </div>
           </Section>
 
           <Section title="Rincian pengeluaran" accent="red">
             {[
-              { label: "Makan & souvenir — Thai 1 hari", detail: `${t1n} × ฿${f(t1c)}`, val: c.opsMT1 },
-              { label: "Makan & souvenir — Thai 2 hari", detail: `${t2n} × ฿${f(t2c)}`, val: c.opsMT2 },
-              { label: "Makan & souvenir — Thai 3 hari", detail: `${t3n} × ฿${f(t3c)}`, val: c.opsMT3 },
-              { label: "Makan & souvenir — panitia + non-Thai", detail: `${c.pTotal + yn} × ฿${f(t3c)}`, val: c.opsMFull },
-              { label: "City tour (3hr + panitia + non-Thai)", detail: `${t3n + c.pTotal + yn} × ฿${f(cityTour)}`, val: c.opsCT },
-              { label: "Biaya venue (non-subsidi)", detail: `${c.venuePayers} pax × ฿${f(kbriV)}`, val: c.biayaVenue, accent: true },
-              { label: "Hotel panitia", detail: `${c.rooms} kamar × ${hotelN} mlm × ฿${f(hotelPPN)}`, val: c.hotelCost, accent: true },
-              { label: "Souvenir khusus panitia", detail: `${souvN} × ฿${f(souvP)}`, val: c.souvCost, accent: true },
-              { label: `Contingency digunakan (${contUsage}%)`, detail: `฿${f(c.contCollected)} × ${contUsage}%`, val: Math.round(c.contUsed), accent: true },
+              { label: "Makan & souvenir — Thai 1 hari", detail: `${t1n} × ฿${formatCurrency(t1c)}`, val: c.opsMT1 },
+              { label: "Makan & souvenir — Thai 2 hari", detail: `${t2n} × ฿${formatCurrency(t2c)}`, val: c.opsMT2 },
+              { label: "Makan & souvenir — Thai 3 hari", detail: `${t3n} × ฿${formatCurrency(t3c)}`, val: c.opsMT3 },
+              { label: "Makan & souvenir — panitia + non-Thai", detail: `${c.pTotal + yn} × ฿${formatCurrency(t3c)}`, val: c.opsMFull },
+              { label: "City tour (3hr + panitia + non-Thai)", detail: `${t3n + c.pTotal + yn} × ฿${formatCurrency(cityTour)}`, val: c.opsCT },
+              { label: "Biaya venue (non-subsidi)", detail: `${c.venuePayers} pax × ฿${formatCurrency(kbriV)}`, val: c.biayaVenue, accent: true },
+              { label: "Hotel panitia", detail: `${c.rooms} kamar × ${hotelN} mlm × ฿${formatCurrency(hotelPPN)}`, val: c.hotelCost, accent: true },
+              { label: "Souvenir khusus panitia", detail: `${souvN} × ฿${formatCurrency(souvP)}`, val: c.souvCost, accent: true },
+              { label: `Contingency digunakan (${contUsage}%)`, detail: `฿${formatCurrency(c.contCollected)} × ${contUsage}%`, val: Math.round(c.contUsed), accent: true },
             ].map(({ label, detail, val, accent }) => (
               <div key={label} style={{
                 display: "flex", justifyContent: "space-between", alignItems: "flex-start",
@@ -349,11 +451,11 @@ export default function App() {
                   <div style={{ fontSize: 13, color: "var(--color-text-primary)" }}>{label}</div>
                   <div style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>{detail}</div>
                 </div>
-                <div style={{ fontSize: 13 }}>฿{f(val)}</div>
+                <div style={{ fontSize: 13 }}>฿{formatCurrency(val)}</div>
               </div>
             ))}
             <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 8, fontWeight: 500, fontSize: 14, color: "#A32D2D" }}>
-              <span>Total pengeluaran</span><span>฿{f(c.totalCost)}</span>
+              <span>Total pengeluaran</span><span>฿{formatCurrency(c.totalCost)}</span>
             </div>
           </Section>
 
@@ -366,7 +468,7 @@ export default function App() {
               { label: "Panitia non-Thai gratis venue", val: `${c.pnonGratis} pax` },
               { label: "Panitia non-Thai bayar venue", val: `${c.pnonBayarVenue} pax` },
               { label: "Peserta non-Thai bayar venue", val: `${yn} pax` },
-              { label: "Total nilai subsidi KBRI", val: `฿${f(c.subsidiTotal)}`, bold: true },
+              { label: "Total nilai subsidi KBRI", val: `฿${formatCurrency(c.subsidiTotal)}`, bold: true },
               { label: "Kuota tidak terpakai (hangus)", val: `${c.kuotaHangus} pax`, warn: c.kuotaHangus > 0 },
             ].map(({ label, val, bold, warn }) => (
               <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontSize: 13 }}>
@@ -393,7 +495,7 @@ export default function App() {
                 }}>
                   <div style={{ fontSize: 11, color: marg >= 0 ? "#3B6D11" : "#A32D2D" }}>{label}</div>
                   <div style={{ fontSize: 15, fontWeight: 500, color: marg >= 0 ? "#27500A" : "#791F1F" }}>
-                    {marg >= 0 ? "+" : "-"}฿{f(marg)}
+                    {marg >= 0 ? "+" : "-"}฿{formatCurrency(marg)}
                   </div>
                 </div>
               ))}
@@ -405,12 +507,12 @@ export default function App() {
               fontSize: 13, fontWeight: 500, marginBottom: 10,
               color: isOpsDeficit ? "#A32D2D" : "#3B6D11"
             }}>
-              Surplus operasional: {isOpsDeficit ? "- " : "+ "}฿{f(c.operationalSurplus)}
+              Surplus operasional: {isOpsDeficit ? "- " : "+ "}฿{formatCurrency(c.operationalSurplus)}
             </div>
 
             {isOpsDeficit ? (
               <div style={{ background: "#FAEEDA", borderRadius: "var(--border-radius-md)", padding: "10px 12px", fontSize: 12, color: "#854F0B" }}>
-                <div style={{ fontWeight: 500, marginBottom: 6 }}>Untuk menutup defisit ฿{f(-c.operationalSurplus)}:</div>
+                <div style={{ fontWeight: 500, marginBottom: 6 }}>Untuk menutup defisit ฿{formatCurrency(-c.operationalSurplus)}:</div>
                 {c.margY > 0 && <div>+ Tambah minimal <b>{Math.ceil(-c.operationalSurplus / c.margY)}</b> peserta non-Thailand</div>}
                 {c.margT3 > 0 && <div>+ Tambah minimal <b>{Math.ceil(-c.operationalSurplus / c.margT3)}</b> peserta Thailand 3 hari</div>}
                 {c.margT1 > 0 && <div>+ Tambah minimal <b>{Math.ceil(-c.operationalSurplus / c.margT1)}</b> peserta Thailand 1 hari</div>}
@@ -441,10 +543,10 @@ export default function App() {
               </div>
             ))}
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#3B6D11" }}>
-              <span>Total pendapatan</span><span>฿{f(c.revenue)}</span>
+              <span>Total pendapatan</span><span>฿{formatCurrency(c.revenue)}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#A32D2D" }}>
-              <span>Total pengeluaran</span><span>฿{f(c.totalCost)}</span>
+              <span>Total pengeluaran</span><span>฿{formatCurrency(c.totalCost)}</span>
             </div>
             <div style={{
               display: "flex", justifyContent: "space-between", fontSize: 16, fontWeight: 500,
@@ -453,7 +555,7 @@ export default function App() {
               color: isDeficit ? "#791F1F" : "#27500A"
             }}>
               <span>{isDeficit ? "DEFISIT AKHIR" : "SURPLUS AKHIR"}</span>
-              <span>{isDeficit ? "- " : "+ "}฿{f(c.totalSurplus)}</span>
+              <span>{isDeficit ? "- " : "+ "}฿{formatCurrency(c.totalSurplus)}</span>
             </div>
           </div>
         </div>

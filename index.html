@@ -17,67 +17,243 @@
       --border-radius-md: 8px;
       --border-radius-lg: 12px;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: var(--font-sans);
-      background: var(--color-background-tertiary);
-      color: var(--color-text-primary);
-    }
-
-    input[type="number"],
-    input[type="range"] {
-      font-family: var(--font-sans);
-    }
-
-    input[type="number"] {
-      border: 1px solid var(--color-border-tertiary);
-      border-radius: var(--border-radius-md);
-      padding: 6px 8px;
-    }
-
-    input[type="number"]:focus {
-      outline: none;
-      border-color: #378ADD;
-      box-shadow: 0 0 0 2px rgba(55, 138, 221, 0.1);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 4px;
-    }
-
-    #root {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--color-background-tertiary); color: var(--color-text-primary); }
+    input[type="number"] { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 6px 8px; font-family: var(--font-sans); }
+    input[type="number"]:focus { outline: none; border-color: #378ADD; box-shadow: 0 0 0 2px rgba(55, 138, 221, 0.1); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 4px; }
+    #root { display: flex; flex-direction: column; min-height: 100vh; }
   </style>
 </head>
 <body>
   <div id="root"></div>
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script>
+    const { useState, useMemo } = React;
+    const h = React.createElement;
+    const formatCurrency = (n) => Math.round(Math.abs(n)).toLocaleString("id-ID");
 
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    function Field({ label, value, onChange, suffix = "Baht", small }) {
+      return h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } },
+        h("label", { style: { fontSize: small ? 12 : 13, color: "var(--color-text-secondary)", flex: 1 } }, label),
+        h("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
+          h("input", { type: "number", min: "0", value, onChange: e => onChange(Math.max(0, Number(e.target.value) || 0)), style: { width: 80, textAlign: "right", fontSize: 13 } }),
+          h("span", { style: { fontSize: 11, color: "var(--color-text-tertiary)", width: 30 } }, suffix)
+        )
+      );
+    }
 
-  <script type="text/babel" src="Calculator.js"></script>
-  <script type="text/babel">
+    function Section({ title, accent, children }) {
+      const accentColors = { blue: { bg: "#E6F1FB", border: "#378ADD", text: "#0C447C" }, green: { bg: "#EAF3DE", border: "#639922", text: "#3B6D11" }, amber: { bg: "#FAEEDA", border: "#BA7517", text: "#854F0B" }, teal: { bg: "#E1F5EE", border: "#1D9E75", text: "#0F6E56" }, pink: { bg: "#FBEAF0", border: "#D4537E", text: "#993556" }, red: { bg: "#FCEBEB", border: "#E24B4A", text: "#A32D2D" }, purple: { bg: "#EEEDFE", border: "#7F77DD", text: "#3C3489" } };
+      const color = accentColors[accent] || accentColors.blue;
+      return h("div", { style: { background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", marginBottom: 12, overflow: "hidden" } },
+        h("div", { style: { background: color.bg, borderBottom: `0.5px solid ${color.border}`, padding: "8px 14px", fontSize: 13, fontWeight: 500, color: color.text } }, title),
+        h("div", { style: { padding: "12px 14px" } }, children)
+      );
+    }
+
+    function MetricCard({ label, value, color }) {
+      const cardColors = { green: { bg: "#EAF3DE", text: "#3B6D11", val: "#27500A" }, red: { bg: "#FCEBEB", text: "#A32D2D", val: "#791F1F" }, blue: { bg: "#E6F1FB", text: "#185FA5", val: "#0C447C" }, amber: { bg: "#FAEEDA", text: "#854F0B", val: "#633806" }, teal: { bg: "#E1F5EE", text: "#0F6E56", val: "#085041" } };
+      const cardColor = cardColors[color] || cardColors.blue;
+      return h("div", { style: { background: cardColor.bg, borderRadius: "var(--border-radius-md)", padding: "10px 14px", textAlign: "center" } },
+        h("div", { style: { fontSize: 11, color: cardColor.text, marginBottom: 4 } }, label),
+        h("div", { style: { fontSize: 20, fontWeight: 500, color: cardColor.val } }, value)
+      );
+    }
+
+    function App() {
+      const [t1n, setT1n] = useState(20); const [t1p, setT1p] = useState(1000); const [t1c, setT1c] = useState(400);
+      const [t2n, setT2n] = useState(5); const [t2p, setT2p] = useState(1400); const [t2c, setT2c] = useState(800);
+      const [t3n, setT3n] = useState(5); const [t3p, setT3p] = useState(3150); const [t3c, setT3c] = useState(1200);
+      const [cityTour, setCityTour] = useState(1350);
+      const [yn, setYn] = useState(20); const [yp, setYp] = useState(4000);
+      const [pthn, setPthn] = useState(17); const [pthp, setPthp] = useState(4000);
+      const [pnonn, setPnonn] = useState(23); const [pnonp, setPnonp] = useState(4000);
+      const [pReg, setPReg] = useState(44);
+      const [kbriQ, setKbriQ] = useState(70); const [kbriV, setKbriV] = useState(850);
+      const [hotelPPN, setHotelPPN] = useState(700); const [hotelN, setHotelN] = useState(4); const [hotelCap, setHotelCap] = useState(2);
+      const [souvP, setSouvP] = useState(400); const [souvN, setSouvN] = useState(44);
+      const [contPP, setContPP] = useState(600); const [contUsage, setContUsage] = useState(0);
+
+      const c = useMemo(() => {
+        const tTotal = t1n + t2n + t3n; const pTotal = pthn + pnonn; const totalPaying = tTotal + yn + pTotal;
+        const usedByThai = tTotal + pthn; const sisaKuota = Math.max(0, kbriQ - usedByThai);
+        const pnonGratis = Math.min(pnonn, sisaKuota); const pnonBayarVenue = pnonn - pnonGratis;
+        const kuotaHangus = Math.max(0, kbriQ - usedByThai - pnonGratis); const venuePayers = pnonBayarVenue + yn;
+        const biayaVenue = venuePayers * kbriV; const subsidiTotal = (usedByThai + pnonGratis) * kbriV;
+        const revT1 = t1n * t1p; const revT2 = t2n * t2p; const revT3 = t3n * t3p;
+        const revY = yn * yp; const revPth = pthn * pthp; const revPnon = pnonn * pnonp;
+        const revenue = revT1 + revT2 + revT3 + revY + revPth + revPnon;
+        const opsMT1 = t1n * t1c; const opsMT2 = t2n * t2c; const opsMT3 = t3n * t3c;
+        const opsMFull = (pTotal + yn) * t3c; const opsCT = (t3n + pTotal + yn) * cityTour;
+        const opsTotal = opsMT1 + opsMT2 + opsMT3 + opsMFull + opsCT;
+        const rooms = Math.ceil(pTotal / Math.max(1, hotelCap)); const hotelCost = rooms * hotelPPN * hotelN;
+        const souvCost = souvN * souvP; const contCollected = totalPaying * contPP;
+        const contUsed = contCollected * (contUsage / 100); const contUnused = contCollected - contUsed;
+        const totalCost = opsTotal + biayaVenue + hotelCost + souvCost + contUsed;
+        const operationalSurplus = revenue - opsTotal - biayaVenue - hotelCost - souvCost;
+        const totalSurplus = operationalSurplus + contUnused;
+        const margT1 = t1p - t1c; const margT2 = t2p - t2c; const margT3 = t3p - t3c - cityTour;
+        const margY = yp - t3c - cityTour - kbriV; const margPth = pthp - t3c - cityTour;
+        const avgMargPnon = pnonn > 0 ? (pnonn * pnonp - pnonn * (t3c + cityTour) - pnonBayarVenue * kbriV) / pnonn : 0;
+        return { tTotal, pTotal, totalPaying, usedByThai, sisaKuota, pnonGratis, pnonBayarVenue, kuotaHangus, venuePayers, biayaVenue, subsidiTotal, revT1, revT2, revT3, revY, revPth, revPnon, revenue, opsMT1, opsMT2, opsMT3, opsMFull, opsCT, opsTotal, rooms, hotelCost, souvCost, contCollected, contUsed, contUnused, totalCost, operationalSurplus, totalSurplus, margT1, margT2, margT3, margY, margPth, avgMargPnon };
+      }, [t1n,t1p,t1c,t2n,t2p,t2c,t3n,t3p,t3c,cityTour,yn,yp,pthn,pthp,pnonn,pnonp,pReg,kbriQ,kbriV,hotelPPN,hotelN,hotelCap,souvP,souvN,contPP,contUsage]);
+
+      const isDeficit = c.totalSurplus < 0; const isOpsDeficit = c.operationalSurplus < 0;
+
+      return h("div", { style: { fontFamily: "var(--font-sans)", background: "var(--color-background-tertiary)", minHeight: "100vh" } },
+        h("div", { style: { background: "var(--color-background-primary)", borderBottom: "0.5px solid var(--color-border-tertiary)", padding: "12px 20px" } },
+          h("div", { style: { fontSize: 16, fontWeight: 500, color: "var(--color-text-primary)" } }, "Kalkulator Anggaran Simposium"),
+          h("div", { style: { fontSize: 12, color: "var(--color-text-tertiary)" } }, "PPIDK Asia Oceania 2026 · PERMITHA · semua nilai dapat diubah")
+        ),
+        h("div", { style: { background: isDeficit ? "#A32D2D" : "#3B6D11", padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 } },
+          [{ label: "Surplus akhir", value: `${isDeficit ? "- " : "+ "}฿${formatCurrency(c.totalSurplus)}`, big: true }, { label: "Surplus operasional", value: `${isOpsDeficit ? "- " : "+ "}฿${formatCurrency(c.operationalSurplus)}` }, { label: "Contingency tidak terpakai", value: `+ ฿${formatCurrency(c.contUnused)}` }].map(({ label, value, big }) =>
+            h("div", { key: label, style: { textAlign: "center" } },
+              h("div", { style: { fontSize: 11, color: isDeficit ? "#F7C1C1" : "#C0DD97", marginBottom: 2 } }, label),
+              h("div", { style: { fontSize: big ? 24 : 18, fontWeight: 500, color: "white" } }, value)
+            )
+          )
+        ),
+        h("div", { style: { padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 } },
+          h("div", null,
+            h(Section, { title: "Peserta Thailand non-panitia  (venue disubsidi KBRI)", accent: "blue" },
+              h("div", { style: { overflowX: "auto" } },
+                h("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 12 } },
+                  h("thead", null,
+                    h("tr", { style: { borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                      ["Durasi", "Jumlah", "Harga tiket", "Biaya ops"].map(h2 =>
+                        h("th", { key: h2, style: { textAlign: h2 === "Durasi" ? "left" : "right", padding: "4px 4px 6px", color: "var(--color-text-tertiary)", fontWeight: 400 } }, h2)
+                      )
+                    )
+                  ),
+                  h("tbody", null,
+                    [{ dur: "1 hari", n: t1n, setN: setT1n, p: t1p, setP: setT1p, cc: t1c, setCc: setT1c }, { dur: "2 hari", n: t2n, setN: setT2n, p: t2p, setP: setT2p, cc: t2c, setCc: setT2c }, { dur: "3 hari", n: t3n, setN: setT3n, p: t3p, setP: setT3p, cc: t3c, setCc: setT3c }].map(({ dur, n, setN, p, setP, cc, setCc }) =>
+                      h("tr", { key: dur, style: { borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                        h("td", { style: { padding: "5px 4px", color: "var(--color-text-secondary)" } }, dur),
+                        h("td", { style: { padding: "3px 4px", textAlign: "right" } }, h("input", { type: "number", min: "0", value: n, onChange: e => setN(Math.max(0, +e.target.value || 0)), style: { width: 52, textAlign: "right", fontSize: 12 } })),
+                        h("td", { style: { padding: "3px 4px", textAlign: "right" } }, h("input", { type: "number", min: "0", value: p, onChange: e => setP(Math.max(0, +e.target.value || 0)), style: { width: 72, textAlign: "right", fontSize: 12 } })),
+                        h("td", { style: { padding: "3px 4px", textAlign: "right" } }, h("input", { type: "number", min: "0", value: cc, onChange: e => setCc(Math.max(0, +e.target.value || 0)), style: { width: 72, textAlign: "right", fontSize: 12, background: "#FAEEDA" } }))
+                      )
+                    )
+                  )
+                )
+              ),
+              h("div", { style: { marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" } },
+                h("span", { style: { fontSize: 12, color: "var(--color-text-secondary)" } }, "Biaya city tour (3 hari) — Wat Arun + cruise + transport"),
+                h("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
+                  h("input", { type: "number", min: "0", value: cityTour, onChange: e => setCityTour(Math.max(0, +e.target.value || 0)), style: { width: 72, textAlign: "right", fontSize: 12, background: "#FAEEDA" } }),
+                  h("span", { style: { fontSize: 11, color: "var(--color-text-tertiary)" } }, "Baht")
+                )
+              ),
+              h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginTop: 4 } }, "Kolom amber = biaya yang dikeluarkan per orang (bukan harga tiket)")
+            ),
+            h(Section, { title: "Peserta non-Thailand (full 3 hari)", accent: "green" },
+              h("div", { style: { fontSize: 11, color: "#A32D2D", marginBottom: 8 } }, "Membayar venue — tidak mendapat subsidi KBRI"),
+              h(Field, { label: "Jumlah", value: yn, onChange: setYn, suffix: "org" }),
+              h(Field, { label: "Harga tiket", value: yp, onChange: setYp })
+            ),
+            h(Section, { title: "Panitia", accent: "purple" },
+              h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 } },
+                h("div", null,
+                  h("div", { style: { fontSize: 11, fontWeight: 500, color: "var(--color-text-tertiary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 } }, "Thailand"),
+                  h(Field, { label: "Jumlah", value: pthn, onChange: setPthn, suffix: "org", small: true }),
+                  h(Field, { label: "Harga tiket", value: pthp, onChange: setPthp, small: true })
+                ),
+                h("div", null,
+                  h("div", { style: { fontSize: 11, fontWeight: 500, color: "var(--color-text-tertiary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 } }, "Non-Thailand"),
+                  h(Field, { label: "Jumlah", value: pnonn, onChange: setPnonn, suffix: "org", small: true }),
+                  h(Field, { label: "Harga tiket", value: pnonp, onChange: setPnonp, small: true })
+                )
+              ),
+              h("div", { style: { borderTop: "0.5px solid var(--color-border-tertiary)", marginTop: 10, paddingTop: 10 } },
+                h(Field, { label: "Total terdaftar (untuk souvenir, termasuk no-show)", value: pReg, onChange: setPReg, suffix: "org", small: true })
+              )
+            ),
+            h(Section, { title: "Subsidi KBRI (venue)", accent: "amber" },
+              h(Field, { label: "Kuota total", value: kbriQ, onChange: setKbriQ, suffix: "pax" }),
+              h(Field, { label: "Nilai per orang", value: kbriV, onChange: setKbriV }),
+              h("div", { style: { background: "#FAEEDA", borderRadius: "var(--border-radius-md)", padding: "10px 12px", marginTop: 10, fontSize: 12, color: "#854F0B" } },
+                h("div", null, "Dipakai Thai non-panitia: ", h("b", null, c.tTotal), " + Panitia Thai: ", h("b", null, pthn), " = ", h("b", null, c.usedByThai)),
+                h("div", { style: { marginTop: 4 } }, "Sisa → Panitia non-Thai: ", h("b", null, c.pnonGratis), " gratis, ", h("b", null, c.pnonBayarVenue), " bayar venue"),
+                h("div", { style: { marginTop: 4, color: c.kuotaHangus > 0 ? "#A32D2D" : "#3B6D11" } }, "Kuota hangus: ", h("b", null, c.kuotaHangus), " pax  |  Total subsidi: ", h("b", null, "฿" + formatCurrency(c.subsidiTotal)))
+              )
+            ),
+            h(Section, { title: "Hotel panitia", accent: "teal" },
+              h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 10 } },
+                [{ label: "Harga/kamar/malam", val: hotelPPN, set: setHotelPPN }, { label: "Jumlah malam", val: hotelN, set: setHotelN }, { label: "Kapasitas/kamar", val: hotelCap, set: setHotelCap, min: 1 }].map(({ label, val, set, min = 0 }) =>
+                  h("div", { key: label },
+                    h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, label),
+                    h("input", { type: "number", min, value: val, onChange: e => set(Math.max(min, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 13 } })
+                  )
+                )
+              ),
+              h("div", { style: { background: "#E1F5EE", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "#0F6E56" } },
+                h("b", null, c.rooms, " kamar"), " × ฿", formatCurrency(hotelPPN), " × ", hotelN, " malam = ", h("b", null, "฿" + formatCurrency(c.hotelCost))
+              )
+            ),
+            h(Section, { title: "Souvenir khusus panitia", accent: "pink" },
+              h(Field, { label: "Harga per orang", value: souvP, onChange: setSouvP }),
+              h(Field, { label: "Jumlah penerima", value: souvN, onChange: setSouvN, suffix: "org" }),
+              h("div", { style: { background: "#FBEAF0", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "#993556" } },
+                souvN, " × ฿", formatCurrency(souvP), " = ", h("b", null, "฿" + formatCurrency(c.souvCost))
+              )
+            ),
+            h(Section, { title: "Contingency plan", accent: "red" },
+              h(Field, { label: "Nilai per orang", value: contPP, onChange: setContPP }),
+              h("div", { style: { marginTop: 12 } },
+                h("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: 6 } },
+                  h("span", { style: { fontSize: 13, color: "var(--color-text-secondary)" } }, "Persentase digunakan"),
+                  h("span", { style: { fontSize: 13, fontWeight: 500, color: "#A32D2D" } }, contUsage, "% = ฿", formatCurrency(c.contUsed))
+                ),
+                h("input", { type: "range", min: "0", max: "100", step: "5", value: contUsage, onChange: e => setContUsage(+e.target.value), style: { width: "100%" } }),
+                h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--color-text-tertiary)", marginTop: 2 } },
+                  h("span", null, "0% (semua jadi surplus)"),
+                  h("span", null, "100% (habis semua)")
+                )
+              ),
+              h("div", { style: { background: "#FCEBEB", borderRadius: "var(--border-radius-md)", padding: "8px 12px", fontSize: 12, color: "#A32D2D", marginTop: 10 } },
+                h("div", null, "Terkumpul: ", c.totalPaying, " pax × ฿", contPP, " = ", h("b", null, "฿" + formatCurrency(c.contCollected))),
+                h("div", { style: { marginTop: 3 } }, "Terpakai: ", h("b", null, "฿" + formatCurrency(c.contUsed)), "  |  Tidak terpakai: ", h("b", null, "฿" + formatCurrency(c.contUnused)))
+              )
+            )
+          ),
+          h("div", null,
+            h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 } },
+              h(MetricCard, { label: "Total peserta", value: c.totalPaying + " org", color: isDeficit ? "red" : "teal" }),
+              h(MetricCard, { label: "Total pendapatan", value: "฿" + formatCurrency(c.revenue), color: "blue" }),
+              h(MetricCard, { label: "Total pengeluaran", value: "฿" + formatCurrency(c.totalCost), color: "amber" })
+            ),
+            h(Section, { title: "Ringkasan akhir", accent: "green" },
+              h("div", { style: { fontSize: 14, fontWeight: 500, color: "var(--color-text-primary)", marginBottom: 10 } }, "Ringkasan akhir"),
+              [{ label: "Total peserta hadir", val: `${c.totalPaying} orang` }, { label: "  Thailand non-panitia", val: `${c.tTotal} orang` }, { label: "  Non-Thailand", val: `${yn} orang` }, { label: "  Panitia hadir", val: `${c.pTotal} orang` }].map(({ label, val }) =>
+                h("div", { key: label, style: { display: "flex", justifyContent: "space-between", fontSize: 13, padding: "3px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", color: "var(--color-text-secondary)" } },
+                  h("span", null, label),
+                  h("span", null, val)
+                )
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#3B6D11" } },
+                h("span", null, "Total pendapatan"),
+                h("span", null, "฿" + formatCurrency(c.revenue))
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#A32D2D" } },
+                h("span", null, "Total pengeluaran"),
+                h("span", null, "฿" + formatCurrency(c.totalCost))
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 16, fontWeight: 500, padding: "10px 12px", marginTop: 8, borderRadius: "var(--border-radius-md)", background: isDeficit ? "#FCEBEB" : "#EAF3DE", color: isDeficit ? "#791F1F" : "#27500A" } },
+                h("span", null, isDeficit ? "DEFISIT AKHIR" : "SURPLUS AKHIR"),
+                h("span", null, isDeficit ? "- " : "+ ", "฿" + formatCurrency(c.totalSurplus))
+              )
+            )
+          )
+        )
+      );
+    }
+
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    root.render(React.createElement(App));
   </script>
 </body>
 </html>

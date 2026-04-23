@@ -350,10 +350,14 @@
                 h("span", null, "Total pengeluaran"),
                 h("span", null, "฿" + formatCurrency(c.totalCost))
               ),
-              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, padding: "10px 12px", borderRadius: "var(--border-radius-md)", background: isDeficit ? "#FCEBEB" : "#EAF3DE", color: isDeficit ? "#791F1F" : "#27500A" } },
-                h("span", null, "Nilai akhir " + (isDeficit ? "DEFISIT" : "SURPLUS")),
-                h("span", null, isDeficit ? "- ฿" + formatCurrency(c.totalSurplus) : "+ ฿" + formatCurrency(c.totalSurplus))
-              )
+              (() => {
+                const nilaiAkhir = c.revenue - c.totalCost;
+                const isAkhirDeficit = nilaiAkhir < 0;
+                return h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, padding: "10px 12px", borderRadius: "var(--border-radius-md)", background: isAkhirDeficit ? "#FCEBEB" : "#EAF3DE", color: isAkhirDeficit ? "#791F1F" : "#27500A" } },
+                  h("span", null, "Nilai akhir " + (isAkhirDeficit ? "DEFISIT" : "SURPLUS")),
+                  h("span", null, isAkhirDeficit ? "- ฿" + formatCurrency(nilaiAkhir) : "+ ฿" + formatCurrency(nilaiAkhir))
+                );
+              })()
             )
           )
         )

@@ -1,0 +1,16 @@
+{
+  "name": "kalkulator-anggaran-simposium",
+  "version": "1.0.0",
+  "description": "Budget Calculator for PPIDK Asia Oceania 2026 Symposium",
+  "main": "index.html",
+  "type": "module",
+  "keywords": [
+    "calculator",
+    "symposium",
+    "budget",
+    "ppidk",
+    "react"
+  ],
+  "author": "PPIDK Asia Oceania 2026 - PERMITHA",
+  "license": "MIT"
+}

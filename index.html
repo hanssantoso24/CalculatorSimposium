@@ -102,20 +102,16 @@
         return { tTotal, pTotal, totalPaying, usedByThai, sisaKuota, pnonGratis, pnonBayarVenue, kuotaHangus, venuePayers, biayaVenue, subsidiTotal, revT1, revT2, revT3, revY, revPth, revPnon, revenue, opsMT1, opsMT2, opsMT3, opsMFull, opsCT, opsTotal, rooms, hotelCost, souvCost, contCollected, contUsed, contUnused, totalCost, operationalSurplus, totalSurplus, margT1, margT2, margT3, margY, margPth, avgMargPnon };
       }, [t1n,t1p,t1c,t2n,t2p,t2c,t3n,t3p,t3c,cityTour,yn,yp,pthn,pthp,pnonn,pnonp,pReg,kbriQ,kbriV,hotelPPN,hotelN,hotelCap,souvP,souvN,contPP,contUsage]);
 
-      const isDeficit = c.totalSurplus < 0; const isOpsDeficit = c.operationalSurplus < 0;
+      const isDeficit = c.totalSurplus < 0;
 
       return h("div", { style: { fontFamily: "var(--font-sans)", background: "var(--color-background-tertiary)", minHeight: "100vh" } },
         h("div", { style: { background: "var(--color-background-primary)", borderBottom: "0.5px solid var(--color-border-tertiary)", padding: "12px 20px" } },
           h("div", { style: { fontSize: 16, fontWeight: 500, color: "var(--color-text-primary)" } }, "Kalkulator Anggaran Simposium"),
           h("div", { style: { fontSize: 12, color: "var(--color-text-tertiary)" } }, "PPIDK Asia Oceania 2026 · PERMITHA · semua nilai dapat diubah")
         ),
-        h("div", { style: { background: isDeficit ? "#A32D2D" : "#3B6D11", padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 } },
-          [{ label: "Surplus akhir", value: `${isDeficit ? "- " : "+ "}฿${formatCurrency(c.totalSurplus)}`, big: true }, { label: "Surplus operasional", value: `${isOpsDeficit ? "- " : "+ "}฿${formatCurrency(c.operationalSurplus)}` }, { label: "Contingency tidak terpakai", value: `+ ฿${formatCurrency(c.contUnused)}` }].map(({ label, value, big }) =>
-            h("div", { key: label, style: { textAlign: "center" } },
-              h("div", { style: { fontSize: 11, color: isDeficit ? "#F7C1C1" : "#C0DD97", marginBottom: 2 } }, label),
-              h("div", { style: { fontSize: big ? 24 : 18, fontWeight: 500, color: "white" } }, value)
-            )
-          )
+        h("div", { style: { background: isDeficit ? "#A32D2D" : "#3B6D11", padding: "16px 20px", textAlign: "center" } },
+          h("div", { style: { fontSize: 12, color: isDeficit ? "#F7C1C1" : "#C0DD97", marginBottom: 6 } }, isDeficit ? "DEFISIT AKHIR" : "SURPLUS AKHIR"),
+          h("div", { style: { fontSize: 28, fontWeight: 500, color: "white" } }, isDeficit ? "- " : "+ ", "฿", formatCurrency(c.totalSurplus))
         ),
         h("div", { style: { padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 } },
           h("div", null,
@@ -226,25 +222,44 @@
               h(MetricCard, { label: "Total pendapatan", value: "฿" + formatCurrency(c.revenue), color: "blue" }),
               h(MetricCard, { label: "Total pengeluaran", value: "฿" + formatCurrency(c.totalCost), color: "amber" })
             ),
-            h(Section, { title: "Ringkasan akhir", accent: "green" },
-              h("div", { style: { fontSize: 14, fontWeight: 500, color: "var(--color-text-primary)", marginBottom: 10 } }, "Ringkasan akhir"),
+            h(Section, { title: "Rincian pendapatan", accent: "green" },
+              [
+                { label: "Peserta Thailand 1 hari", qty: t1n, price: t1p, calc: `${t1n} × ฿${formatCurrency(t1p)}`, margin: `margin ฿${formatCurrency(c.margT1)}/org` },
+                { label: "Peserta Thailand 2 hari", qty: t2n, price: t2p, calc: `${t2n} × ฿${formatCurrency(t2p)}`, margin: `margin ฿${formatCurrency(c.margT2)}/org` },
+                { label: "Peserta Thailand 3 hari", qty: t3n, price: t3p, calc: `${t3n} × ฿${formatCurrency(t3p)}`, margin: `margin ฿${formatCurrency(c.margT3)}/org` },
+                { label: "Peserta non-Thailand", qty: yn, price: yp, calc: `${yn} × ฿${formatCurrency(yp)}`, margin: `margin ฿${formatCurrency(c.margY)}/org` },
+                { label: "Panitia Thailand", qty: pthn, price: pthp, calc: `${pthn} × ฿${formatCurrency(pthp)}`, margin: `margin ฿${formatCurrency(c.margPth)}/org` },
+                { label: "Panitia non-Thailand", qty: pnonn, price: pnonp, calc: `${pnonn} × ฿${formatCurrency(pnonp)}`, margin: `margin ฿${Math.round(c.avgMargPnon)}/org` }
+              ].map(({ label, calc, margin }) =>
+                h("div", { key: label, style: { marginBottom: 12, paddingBottom: 12, borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                  h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, color: "var(--color-text-primary)" } },
+                    h("span", null, label),
+                    h("span", null, "฿" + formatCurrency(label === "Peserta Thailand 1 hari" ? c.revT1 : label === "Peserta Thailand 2 hari" ? c.revT2 : label === "Peserta Thailand 3 hari" ? c.revT3 : label === "Peserta non-Thailand" ? c.revY : label === "Panitia Thailand" ? c.revPth : c.revPnon))
+                  ),
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginTop: 2 } }, calc),
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginTop: 2 } }, margin)
+                )
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 500, padding: "8px 0", color: "#3B6D11" } },
+                h("span", null, "Total pendapatan"),
+                h("span", null, "฿" + formatCurrency(c.revenue))
+              )
+            ),
+            h(Section, { title: "Ringkasan akhir", accent: "blue" },
+              h("div", { style: { fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", marginBottom: 10 } }, "Ringkasan akhir"),
               [{ label: "Total peserta hadir", val: `${c.totalPaying} orang` }, { label: "  Thailand non-panitia", val: `${c.tTotal} orang` }, { label: "  Non-Thailand", val: `${yn} orang` }, { label: "  Panitia hadir", val: `${c.pTotal} orang` }].map(({ label, val }) =>
-                h("div", { key: label, style: { display: "flex", justifyContent: "space-between", fontSize: 13, padding: "3px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", color: "var(--color-text-secondary)" } },
+                h("div", { key: label, style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", color: "var(--color-text-secondary)" } },
                   h("span", null, label),
                   h("span", null, val)
                 )
               ),
-              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#3B6D11" } },
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#3B6D11" } },
                 h("span", null, "Total pendapatan"),
                 h("span", null, "฿" + formatCurrency(c.revenue))
               ),
-              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#A32D2D" } },
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "5px 0", fontWeight: 500, color: "#A32D2D" } },
                 h("span", null, "Total pengeluaran"),
                 h("span", null, "฿" + formatCurrency(c.totalCost))
-              ),
-              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 16, fontWeight: 500, padding: "10px 12px", marginTop: 8, borderRadius: "var(--border-radius-md)", background: isDeficit ? "#FCEBEB" : "#EAF3DE", color: isDeficit ? "#791F1F" : "#27500A" } },
-                h("span", null, isDeficit ? "DEFISIT AKHIR" : "SURPLUS AKHIR"),
-                h("span", null, isDeficit ? "- " : "+ ", "฿" + formatCurrency(c.totalSurplus))
               )
             )
           )

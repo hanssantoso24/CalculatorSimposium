@@ -316,17 +316,43 @@
               )
             )] : []),
             h(Section, { title: "Ringkasan akhir", accent: isDeficit ? "red" : "green" },
-              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 500, padding: "8px 0", marginBottom: 12, color: isDeficit ? "#A32D2D" : "#3B6D11" } },
-                h("span", null, isDeficit ? "DEFISIT" : "SURPLUS"),
-                h("span", null, isDeficit ? "- ฿" + formatCurrency(c.totalSurplus) : "+ ฿" + formatCurrency(c.totalSurplus))
+              h("div", { style: { fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", marginBottom: 10, paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)" } }, "Total peserta hadir"),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0" } },
+                h("span", null, "Seluruhnya"),
+                h("span", { style: { fontWeight: 500 } }, c.totalPaying + " orang")
+              ),
+              h("div", { style: { fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", marginTop: 10, marginBottom: 6 } }, "Thailand non-panitia"),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0", marginLeft: 8 } },
+                h("span", null, "Hadir day 1"),
+                h("span", { style: { fontWeight: 500 } }, t1n + " orang")
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0", marginLeft: 8 } },
+                h("span", null, "Hadir day 1-2"),
+                h("span", { style: { fontWeight: 500 } }, t2n + " orang")
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0", marginLeft: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
+                h("span", null, "Hadir day 1-3"),
+                h("span", { style: { fontWeight: 500 } }, t3n + " orang")
               ),
               h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                h("span", null, "Non-Thailand"),
+                h("span", { style: { fontWeight: 500 } }, yn + " orang")
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
+                h("span", null, "Panitia hadir"),
+                h("span", { style: { fontWeight: 500 } }, c.pTotal + " orang")
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#3B6D11" } },
                 h("span", null, "Total pendapatan"),
-                h("span", { style: { fontWeight: 500, color: "#3B6D11" } }, "฿" + formatCurrency(c.revenue))
+                h("span", null, "฿" + formatCurrency(c.revenue))
               ),
-              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#A32D2D", marginBottom: 10 } },
                 h("span", null, "Total pengeluaran"),
-                h("span", { style: { fontWeight: 500, color: "#A32D2D" } }, "฿" + formatCurrency(c.totalCost))
+                h("span", null, "฿" + formatCurrency(c.totalCost))
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, padding: "10px 12px", borderRadius: "var(--border-radius-md)", background: isDeficit ? "#FCEBEB" : "#EAF3DE", color: isDeficit ? "#791F1F" : "#27500A" } },
+                h("span", null, "Nilai akhir"),
+                h("span", null, isDeficit ? "- ฿" + formatCurrency(c.totalSurplus) : "+ ฿" + formatCurrency(c.totalSurplus))
               )
             )
           )

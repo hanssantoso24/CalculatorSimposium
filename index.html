@@ -303,7 +303,7 @@
                 )
               )
             ),
-            isDeficit && h(Section, { title: `Untuk menutup defisit ฿${formatCurrency(c.totalSurplus)}:`, accent: "red" },
+            ...(isDeficit ? [h(Section, { title: `Untuk menutup defisit ฿${formatCurrency(c.totalSurplus)}:`, accent: "red" },
               h("div", { style: { fontSize: 12, color: "var(--color-text-secondary)" } },
                 [
                   { label: "peserta non-Thailand", margin: c.margY },
@@ -314,8 +314,12 @@
                   return h("div", { key: label, style: { marginBottom: 8 } }, "Tambah minimal ", h("b", null, needed), " ", label);
                 })
               )
-            ),
+            )] : []),
             h(Section, { title: "Ringkasan akhir", accent: isDeficit ? "red" : "green" },
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 500, padding: "8px 0", marginBottom: 12, color: isDeficit ? "#A32D2D" : "#3B6D11" } },
+                h("span", null, isDeficit ? "DEFISIT" : "SURPLUS"),
+                h("span", null, isDeficit ? "- ฿" + formatCurrency(c.totalSurplus) : "+ ฿" + formatCurrency(c.totalSurplus))
+              ),
               h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
                 h("span", null, "Total pendapatan"),
                 h("span", { style: { fontWeight: 500, color: "#3B6D11" } }, "฿" + formatCurrency(c.revenue))
@@ -323,10 +327,6 @@
               h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
                 h("span", null, "Total pengeluaran"),
                 h("span", { style: { fontWeight: 500, color: "#A32D2D" } }, "฿" + formatCurrency(c.totalCost))
-              ),
-              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 16, fontWeight: 500, padding: "10px 0", color: isDeficit ? "#791F1F" : "#27500A", background: isDeficit ? "#FCEBEB" : "#EAF3DE", borderRadius: "var(--border-radius-md)", paddingLeft: 12, paddingRight: 12 } },
-                h("span", null, isDeficit ? "DEFISIT AKHIR" : "SURPLUS AKHIR"),
-                h("span", null, isDeficit ? "- " : "+ ", "฿" + formatCurrency(c.totalSurplus))
               )
             )
           )

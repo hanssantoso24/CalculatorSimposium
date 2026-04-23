@@ -109,10 +109,6 @@
           h("div", { style: { fontSize: 16, fontWeight: 500, color: "var(--color-text-primary)" } }, "Kalkulator Anggaran Simposium"),
           h("div", { style: { fontSize: 12, color: "var(--color-text-tertiary)" } }, "PPIDK Asia Oceania 2026 · PERMITHA · semua nilai dapat diubah")
         ),
-        h("div", { style: { background: isDeficit ? "#A32D2D" : "#3B6D11", padding: "16px 20px", textAlign: "center" } },
-          h("div", { style: { fontSize: 12, color: isDeficit ? "#F7C1C1" : "#C0DD97", marginBottom: 6 } }, isDeficit ? "DEFISIT AKHIR" : "SURPLUS AKHIR"),
-          h("div", { style: { fontSize: 28, fontWeight: 500, color: "white" } }, isDeficit ? "- " : "+ ", "฿", formatCurrency(c.totalSurplus))
-        ),
         h("div", { style: { padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 } },
           h("div", null,
             h(Section, { title: "Peserta Thailand non-panitia  (venue disubsidi KBRI)", accent: "blue" },
@@ -245,21 +241,92 @@
                 h("span", null, "฿" + formatCurrency(c.revenue))
               )
             ),
-            h(Section, { title: "Ringkasan akhir", accent: "blue" },
-              h("div", { style: { fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", marginBottom: 10 } }, "Ringkasan akhir"),
-              [{ label: "Total peserta hadir", val: `${c.totalPaying} orang` }, { label: "  Thailand non-panitia", val: `${c.tTotal} orang` }, { label: "  Non-Thailand", val: `${yn} orang` }, { label: "  Panitia hadir", val: `${c.pTotal} orang` }].map(({ label, val }) =>
-                h("div", { key: label, style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", color: "var(--color-text-secondary)" } },
-                  h("span", null, label),
-                  h("span", null, val)
+            h(Section, { title: "Rincian pengeluaran", accent: "red" },
+              [
+                { label: "Makan & souvenir — Thai 1 hari", calc: `${t1n} × ฿${formatCurrency(t1c)}`, value: c.opsMT1 },
+                { label: "Makan & souvenir — Thai 2 hari", calc: `${t2n} × ฿${formatCurrency(t2c)}`, value: c.opsMT2 },
+                { label: "Makan & souvenir — Thai 3 hari", calc: `${t3n} × ฿${formatCurrency(t3c)}`, value: c.opsMT3 },
+                { label: "Makan & souvenir — panitia + non-Thai", calc: `${pTotal + yn} × ฿${formatCurrency(t3c)}`, value: c.opsMFull },
+                { label: "City tour (3hr + panitia + non-Thai)", calc: `${t3n + pTotal + yn} × ฿${formatCurrency(cityTour)}`, value: c.opsCT },
+                { label: "Biaya venue (non-subsidi)", calc: `${c.venuePayers} pax × ฿${formatCurrency(kbriV)}`, value: c.biayaVenue },
+                { label: "Hotel panitia", calc: `${c.rooms} kamar × ฿${formatCurrency(hotelPPN)} × ${hotelN} malam`, value: c.hotelCost },
+                { label: "Souvenir khusus panitia", calc: `${souvN} × ฿${formatCurrency(souvP)}`, value: c.souvCost },
+                { label: "Contingency digunakan", calc: `${contUsage}%`, value: c.contUsed }
+              ].map(({ label, calc, value }) =>
+                h("div", { key: label, style: { marginBottom: 12, paddingBottom: 12, borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                  h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, color: "var(--color-text-primary)" } },
+                    h("span", null, label),
+                    h("span", null, "฿" + formatCurrency(value))
+                  ),
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginTop: 2 } }, calc)
                 )
               ),
-              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "5px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", fontWeight: 500, color: "#3B6D11" } },
-                h("span", null, "Total pendapatan"),
-                h("span", null, "฿" + formatCurrency(c.revenue))
-              ),
-              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "5px 0", fontWeight: 500, color: "#A32D2D" } },
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 500, padding: "8px 0", color: "#A32D2D" } },
                 h("span", null, "Total pengeluaran"),
                 h("span", null, "฿" + formatCurrency(c.totalCost))
+              )
+            ),
+            h(Section, { title: "Analisis subsidi KBRI", accent: "amber" },
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                h("span", null, "Kuota KBRI"),
+                h("span", { style: { fontWeight: 500 } }, kbriQ + " pax")
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                h("span", null, "Dipakai peserta Thailand non-panitia"),
+                h("span", { style: { fontWeight: 500 } }, c.tTotal + " pax")
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                h("span", null, "Dipakai panitia Thailand"),
+                h("span", { style: { fontWeight: 500 } }, pthn + " pax")
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                h("span", null, "Sisa untuk panitia non-Thailand"),
+                h("span", { style: { fontWeight: 500 } }, c.pnonGratis + " pax")
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)", color: c.kuotaHangus > 0 ? "#A32D2D" : "#3B6D11" } },
+                h("span", null, "Kuota hangus"),
+                h("span", { style: { fontWeight: 500 } }, c.kuotaHangus + " pax")
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", fontWeight: 500, color: "#854F0B" } },
+                h("span", null, "Total nilai subsidi"),
+                h("span", null, "฿" + formatCurrency(c.subsidiTotal))
+              )
+            ),
+            h(Section, { title: "Analisis titik impas (operational)", accent: "blue" },
+              h("div", { style: { fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", marginBottom: 12 } }, "Margin kontribusi per orang (sebelum contingency)"),
+              h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 } },
+                [{ title: "Thai 1hr", val: c.margT1 }, { title: "Thai 2hr", val: c.margT2 }, { title: "Thai 3hr", val: c.margT3 }, { title: "Non-Thai", val: c.margY }, { title: "Pan. Thai", val: c.margPth }, { title: "Pan. non-Thai", val: Math.round(c.avgMargPnon) }].map(({ title, val }) =>
+                  h("div", { key: title, style: { background: "#E6F1FB", borderRadius: "var(--border-radius-md)", padding: "10px 14px", textAlign: "center" } },
+                    h("div", { style: { fontSize: 11, color: "#185FA5", marginBottom: 4 } }, title),
+                    h("div", { style: { fontSize: 16, fontWeight: 500, color: "#0C447C" } }, "+ ฿" + formatCurrency(val))
+                  )
+                )
+              )
+            ),
+            isDeficit && h(Section, { title: `Untuk menutup defisit ฿${formatCurrency(c.totalSurplus)}:`, accent: "red" },
+              h("div", { style: { fontSize: 12, color: "var(--color-text-secondary)" } },
+                [
+                  { label: "peserta non-Thailand", margin: c.margY },
+                  { label: "peserta Thailand 3 hari", margin: c.margT3 },
+                  { label: "peserta Thailand 1 hari", margin: c.margT1 }
+                ].map(({ label, margin }) => {
+                  const needed = Math.ceil(Math.abs(c.totalSurplus) / Math.max(1, margin));
+                  return h("div", { key: label, style: { marginBottom: 8 } }, "Tambah minimal ", h("b", null, needed), " ", label);
+                })
+              )
+            ),
+            h(Section, { title: "Ringkasan akhir", accent: isDeficit ? "red" : "green" },
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                h("span", null, "Total pendapatan"),
+                h("span", { style: { fontWeight: 500, color: "#3B6D11" } }, "฿" + formatCurrency(c.revenue))
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: "0.5px solid var(--color-border-tertiary)" } },
+                h("span", null, "Total pengeluaran"),
+                h("span", { style: { fontWeight: 500, color: "#A32D2D" } }, "฿" + formatCurrency(c.totalCost))
+              ),
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 16, fontWeight: 500, padding: "10px 0", color: isDeficit ? "#791F1F" : "#27500A", background: isDeficit ? "#FCEBEB" : "#EAF3DE", borderRadius: "var(--border-radius-md)", paddingLeft: 12, paddingRight: 12 } },
+                h("span", null, isDeficit ? "DEFISIT AKHIR" : "SURPLUS AKHIR"),
+                h("span", null, isDeficit ? "- " : "+ ", "฿" + formatCurrency(c.totalSurplus))
               )
             )
           )

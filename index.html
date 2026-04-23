@@ -111,36 +111,58 @@
         ),
         h("div", { style: { padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 } },
           h("div", null,
-            h(Section, { title: "Peserta Thailand non-panitia  (venue disubsidi KBRI)", accent: "blue" },
-              h("div", { style: { overflowX: "auto" } },
-                h("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 12 } },
-                  h("thead", null,
-                    h("tr", { style: { borderBottom: "0.5px solid var(--color-border-tertiary)" } },
-                      ["Durasi", "Jumlah", "Harga tiket", "Biaya ops"].map(h2 =>
-                        h("th", { key: h2, style: { textAlign: h2 === "Durasi" ? "left" : "right", padding: "4px 4px 6px", color: "var(--color-text-tertiary)", fontWeight: 400 } }, h2)
-                      )
-                    )
-                  ),
-                  h("tbody", null,
-                    [{ dur: "1 hari", n: t1n, setN: setT1n, p: t1p, setP: setT1p, cc: t1c, setCc: setT1c }, { dur: "2 hari", n: t2n, setN: setT2n, p: t2p, setP: setT2p, cc: t2c, setCc: setT2c }, { dur: "3 hari", n: t3n, setN: setT3n, p: t3p, setP: setT3p, cc: t3c, setCc: setT3c }].map(({ dur, n, setN, p, setP, cc, setCc }) =>
-                      h("tr", { key: dur, style: { borderBottom: "0.5px solid var(--color-border-tertiary)" } },
-                        h("td", { style: { padding: "5px 4px", color: "var(--color-text-secondary)" } }, dur),
-                        h("td", { style: { padding: "3px 4px", textAlign: "right" } }, h("input", { type: "number", min: "0", value: n, onChange: e => setN(Math.max(0, +e.target.value || 0)), style: { width: 52, textAlign: "right", fontSize: 12 } })),
-                        h("td", { style: { padding: "3px 4px", textAlign: "right" } }, h("input", { type: "number", min: "0", value: p, onChange: e => setP(Math.max(0, +e.target.value || 0)), style: { width: 72, textAlign: "right", fontSize: 12 } })),
-                        h("td", { style: { padding: "3px 4px", textAlign: "right" } }, h("input", { type: "number", min: "0", value: cc, onChange: e => setCc(Math.max(0, +e.target.value || 0)), style: { width: 72, textAlign: "right", fontSize: 12, background: "#FAEEDA" } }))
-                      )
-                    )
+            h(Section, { title: "Peserta Thailand non-panitia (venue disubsidi KBRI)", accent: "blue" },
+              h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 } },
+                h("div", null,
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Durasi"),
+                  h("div", null,
+                    h("div", { style: { fontSize: 12, padding: "4px 0" } }, "1 hari"),
+                    h("div", { style: { fontSize: 12, padding: "4px 0" } }, "2 hari"),
+                    h("div", { style: { fontSize: 12, padding: "4px 0" } }, "3 hari")
+                  )
+                ),
+                h("div", null,
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Jumlah"),
+                  h("div", null,
+                    h("input", { type: "number", min: "0", value: t1n, onChange: e => setT1n(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
+                    h("input", { type: "number", min: "0", value: t2n, onChange: e => setT2n(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
+                    h("input", { type: "number", min: "0", value: t3n, onChange: e => setT3n(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12 } })
+                  )
+                ),
+                h("div", null,
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Harga tiket"),
+                  h("div", null,
+                    h("input", { type: "number", min: "0", value: t1p, onChange: e => setT1p(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
+                    h("input", { type: "number", min: "0", value: t2p, onChange: e => setT2p(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
+                    h("input", { type: "number", min: "0", value: t3p, onChange: e => setT3p(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12 } })
                   )
                 )
-              ),
-              h("div", { style: { marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" } },
-                h("span", { style: { fontSize: 12, color: "var(--color-text-secondary)" } }, "Biaya city tour (3 hari) — Wat Arun + cruise + transport"),
-                h("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
-                  h("input", { type: "number", min: "0", value: cityTour, onChange: e => setCityTour(Math.max(0, +e.target.value || 0)), style: { width: 72, textAlign: "right", fontSize: 12, background: "#FAEEDA" } }),
-                  h("span", { style: { fontSize: 11, color: "var(--color-text-tertiary)" } }, "Baht")
+              )
+            ),
+            h(Section, { title: "Biaya operasional", accent: "amber" },
+              h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 } },
+                h("div", null,
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Hari 1"),
+                  h("input", { type: "number", min: "0", value: t1c, onChange: e => setT1c(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)" } }, "Baht")
+                ),
+                h("div", null,
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Hari 1-2"),
+                  h("input", { type: "number", min: "0", value: t2c, onChange: e => setT2c(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)" } }, "Baht")
+                ),
+                h("div", null,
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Hari 1-3"),
+                  h("input", { type: "number", min: "0", value: t3c, onChange: e => setT3c(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)" } }, "Baht")
+                ),
+                h("div", null,
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Biaya City Tour"),
+                  h("input", { type: "number", min: "0", value: cityTour, onChange: e => setCityTour(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, marginBottom: 4 } }),
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)" } }, "Baht")
                 )
               ),
-              h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginTop: 4 } }, "Kolom amber = biaya yang dikeluarkan per orang (bukan harga tiket)")
+              h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginTop: 8 } }, "(Makan & souvenir per orang untuk setiap durasi, City tour untuk peserta 3 hari + panitia + non-Thai)")
             ),
             h(Section, { title: "Peserta non-Thailand (full 3 hari)", accent: "green" },
               h("div", { style: { fontSize: 11, color: "#A32D2D", marginBottom: 8 } }, "Membayar venue — tidak mendapat subsidi KBRI"),

@@ -150,8 +150,6 @@
 
         // INCOME: Total (including non-cash)
         const totalIncome = totalIncomeBeforeCustom + totalKbriSubsidy;
-
-        // CONSUMPTION BREAKDOWN BY DAY
         // Day 1: All participants - 70 subsidized
         const day1Consumers = t1n + t2n + t3n + yn + pTotal;
         const day1ExpenseBeforeSubsidy = day1Consumers * dailyBudget;
@@ -359,7 +357,7 @@
             // Top metrics
             h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 } },
               h(MetricCard, { label: "Total peserta", value: calc.totalPaying + " org", color: isDeficit ? "red" : "teal" }),
-              h(MetricCard, { label: "Total pendapatan", value: "฿" + formatCurrency(calc.totalIncome), color: "blue" }),
+              h(MetricCard, { label: "Total pendapatan", value: "฿" + formatCurrency(calc.totalIncomeBeforeCustom), color: "blue" }),
               h(MetricCard, { label: "Total pengeluaran", value: "฿" + formatCurrency(calc.totalExpenses), color: "amber" })
             ),
 
@@ -415,13 +413,22 @@
                 h("span", null, "City Tour: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.cityTourTotal))
               ),
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, "(฿", formatCurrency(ctTransport), " + ฿", formatCurrency(ctTemple), " + ฿", formatCurrency(ctDinnerCruise), ") × ", ctHeadcount, " = ฿", formatCurrency(calc.cityTourTotal))
+              ),
               h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
                 h("span", null, "Seminar Kit: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.semKitTotal))
               ),
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, semKitN, " × ฿", formatCurrency(semKitP), " = ฿", formatCurrency(calc.semKitTotal))
+              ),
               calc.contingencyExp > 0 ? h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
                 h("span", null, "Biaya Darurat: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.contingencyExp))
+              ) : null,
+              calc.contingencyExp > 0 ? h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, "฿", formatCurrency(calc.totalIncome), " × ", contingencyPct, "% = ฿", formatCurrency(calc.contingencyExp))
               ) : null,
               customExpenses.length > 0 ? customExpenses.map((c, i) =>
                 h("div", { key: i, style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
@@ -434,6 +441,8 @@
             // Ringkasan Akhir (always shows)
             h(Section, { title: "Ringkasan Akhir", accent: "green" },
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Peserta: ", calc.totalPaying, " orang"),
+              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pendapatan (Cash): ฿", formatCurrency(calc.totalIncomeBeforeCustom)),
+              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Benefit-in-kind: ฿", formatCurrency(calc.totalKbriSubsidy)),
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pendapatan (incl. KBRI): ฿", formatCurrency(calc.totalIncome)),
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pengeluaran: ฿", formatCurrency(calc.totalExpenses)),
               h("div", { style: { fontSize: 12, fontWeight: 500 } }, "Nilai Akhir: ฿" + (calc.nilaiAkhir >= 0 ? "+" : "-") + formatCurrency(calc.nilaiAkhir))

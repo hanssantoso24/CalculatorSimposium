@@ -89,6 +89,11 @@
       // KBRI: Non-cash benefit
       const [kbriQ, setKbriQ] = useState(70); const [kbriVenue, setKbriVenue] = useState(850);
 
+      // NON-CASH BENEFITS (Customizable)
+      const [nonCashBenefits, setNonCashBenefits] = useState([
+        { desc: "KBRI Subsidi Venue & Konsumsi Hari 1", qty: 70, price: 0, total: 0 }
+      ]);
+
       // EXPENSES: Contingency (% of revenue)
       const [contingencyPct, setContingencyPct] = useState(0);
 
@@ -127,8 +132,8 @@
         const pTotal = pthn + pnonn;
         const totalPaying = tTotal + yn + pTotal;
 
-        // KBRI subsidy covers 70 people for venue + day 1 consumption
-        const kbriSubsidy = 70;
+        // KBRI subsidy covers people for venue + day 1 consumption
+        const kbriSubsidy = kbriQ;
 
         // INCOME: Registration (cash only)
         const revT1 = t1n * t1p, revT2 = t2n * t2p, revT3 = t3n * t3p;
@@ -197,7 +202,7 @@
           venuePayersCount, venueExp, cityTourTotal, semKitTotal, customExpTotal, contingencyExp,
           totalExpenses, nilaiAkhir, totalKeuntungan, sisaSurplus
         };
-      }, [t1n,t1p,t2n,t2p,t3n,t3p,yn,yp,pthn,pthp,pnonn,pnonp,ppidk,sponsor,customIncomes,kbriQ,kbriVenue,dailyBudget,venuePerPax,ctTransport,ctTemple,ctDinnerCruise,ctHeadcount,semKitP,semKitN,customExpenses,contingencyPct,keuntunganItems,ppidk_perm_split]);
+      }, [t1n,t1p,t2n,t2p,t3n,t3p,yn,yp,pthn,pthp,pnonn,pnonp,ppidk,sponsor,customIncomes,kbriQ,kbriVenue,dailyBudget,venuePerPax,ctTransport,ctTemple,ctDinnerCruise,ctHeadcount,semKitP,semKitN,customExpenses,contingencyPct,keuntunganItems,ppidk_perm_split,nonCashBenefits]);
 
       const isDeficit = calc.nilaiAkhir < 0;
       const isSisaDeficit = calc.sisaSurplus < 0;
@@ -263,24 +268,21 @@
             ),
 
             // PENDAPATAN BUKAN CASH (Non-cash benefits)
-            h(Section, { title: "PENDAPATAN BUKAN CASH (Benefit-in-kind KBRI)", accent: "gray" },
+            h(Section, { title: "PENDAPATAN BUKAN CASH (Benefit-in-kind)", accent: "gray" },
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "KBRI - Subsidi Venue & Konsumsi Hari 1"),
-              h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 6 } }, "Penerima: ", calc.kbriSubsidy, " pax"),
-              h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 } },
-                h("div", null,
-                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Kuota"),
-                  h("input", { type: "number", min: "0", value: kbriQ, onChange: e => setKbriQ(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12 } })
-                ),
-                h("div", null,
-                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Venue/pax"),
-                  h("input", { type: "number", min: "0", value: kbriVenue, onChange: e => setKbriVenue(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12 } })
-                )
+              h("div", { style: { marginBottom: 12 } },
+                h("input", { type: "number", min: "0", value: kbriQ, onChange: e => setKbriQ(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 12, padding: "6px 8px" } })
               ),
-              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginBottom: 8 } },
-                h("div", null, "Venue: ", calc.kbriSubsidy, " × ฿", formatCurrency(kbriVenue), " = ฿", formatCurrency(calc.kbriVenueSubsidy)),
-                h("div", null, "Day 1 Konsumsi: ", calc.kbriSubsidy, " × ฿", formatCurrency(dailyBudget), " = ฿", formatCurrency(calc.kbriDay1Subsidy)),
-                h("div", { style: { fontWeight: 500, marginTop: 4, paddingTop: 4, borderTop: "0.5px solid var(--color-border-tertiary)" } }, "Total: ฿", formatCurrency(calc.totalKbriSubsidy))
-              )
+              nonCashBenefits.length > 1 ? nonCashBenefits.slice(1).map((item, i) =>
+                h("div", { key: i, style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 40px", gap: 6, marginBottom: 8, alignItems: "flex-end" } },
+                  h("input", { type: "text", placeholder: "Deskripsi", value: item.desc, onChange: e => { const ni = [...nonCashBenefits]; ni[i+1].desc = e.target.value; setNonCashBenefits(ni); }, style: { fontSize: 11, padding: "4px 6px" } }),
+                  h("input", { type: "number", min: "0", placeholder: "Qty", value: item.qty, onChange: e => { const ni = [...nonCashBenefits]; ni[i+1].qty = +e.target.value || 0; ni[i+1].total = ni[i+1].qty * ni[i+1].price; setNonCashBenefits(ni); }, style: { fontSize: 11, padding: "4px 6px", textAlign: "right" } }),
+                  h("input", { type: "number", min: "0", placeholder: "Price", value: item.price, onChange: e => { const ni = [...nonCashBenefits]; ni[i+1].price = +e.target.value || 0; ni[i+1].total = ni[i+1].qty * ni[i+1].price; setNonCashBenefits(ni); }, style: { fontSize: 11, padding: "4px 6px", textAlign: "right" } }),
+                  h("div", { style: { fontSize: 11, fontWeight: 500, textAlign: "right" } }, "฿", formatCurrency(item.total)),
+                  h("button", { onClick: () => setNonCashBenefits(nonCashBenefits.filter((_, j) => j !== i+1)), style: { width: 40, height: 26, border: "1px solid var(--color-border-tertiary)", background: "white", borderRadius: 4, cursor: "pointer", fontSize: 12 } }, "×")
+                )
+              ) : null,
+              h("button", { onClick: () => setNonCashBenefits([...nonCashBenefits, { desc: "", qty: 0, price: 0, total: 0 }]), style: { width: "100%", padding: "6px", fontSize: 11, border: "1px solid var(--color-border-tertiary)", background: "var(--color-background-secondary)", borderRadius: 4, cursor: "pointer" } }, "+ Tambah benefit non-cash")
             ),
 
             // PENGELUARAN
@@ -288,7 +290,7 @@
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "1. Konsumsi (Daily Budget: ฿" + formatCurrency(dailyBudget) + ")"),
               h("input", { type: "number", min: "0", value: dailyBudget, onChange: e => setDailyBudget(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11, marginBottom: 12, padding: "4px 6px" } }),
               h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginBottom: 12 } },
-                h("div", null, "Hari 1: ", calc.day1Consumers, " konsumen - ", calc.kbriSubsidy, " subsidi = ", calc.day1Consumers - calc.kbriSubsidy, " × ฿", formatCurrency(dailyBudget), " = ฿", formatCurrency(calc.day1Expense)),
+                h("div", null, "Hari 1: ", calc.day1Consumers, " konsumen - ", kbriQ, " subsidi = ", calc.day1Consumers - calc.kbriSubsidy, " × ฿", formatCurrency(dailyBudget), " = ฿", formatCurrency(calc.day1Expense)),
                 h("div", null, "Hari 2: ", calc.day2Consumers, " konsumen × ฿", formatCurrency(dailyBudget), " = ฿", formatCurrency(calc.day2Expense)),
                 h("div", null, "Hari 3: ", calc.day3Consumers, " konsumen × ฿", formatCurrency(dailyBudget), " = ฿", formatCurrency(calc.day3Expense)),
                 h("div", { style: { fontWeight: 500, marginTop: 4, paddingTop: 4, borderTop: "0.5px solid var(--color-border-tertiary)" } }, "Total Konsumsi: ฿", formatCurrency(calc.consumptionTotal))
@@ -298,7 +300,7 @@
               h("input", { type: "number", min: "0", value: venuePerPax, onChange: e => setVenuePerPax(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11, marginBottom: 8, padding: "4px 6px" } }),
               h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginBottom: 12 } },
                 h("div", null, "Total peserta: ", calc.totalPaying),
-                h("div", null, "Dikurangi subsidi: ", calc.kbriSubsidy),
+                h("div", null, "Dikurangi subsidi: ", kbriQ),
                 h("div", null, "Pembayar: ", calc.venuePayersCount, " × ฿", formatCurrency(venuePerPax), " = ฿", formatCurrency(calc.venueExp))
               ),
 
@@ -388,11 +390,7 @@
                   h("span", null, c.desc),
                   h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(c.total))
                 )
-              ) : null,
-              h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
-                h("span", null, "KBRI Benefit-in-kind: "),
-                h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.totalKbriSubsidy))
-              )
+              ) : null
             ),
 
             // Rincian Pengeluaran

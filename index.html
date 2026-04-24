@@ -25,7 +25,6 @@
     table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: 4px; }
     #root { display: flex; flex-direction: column; min-height: 100vh; }
-    .sticky-footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--color-border-tertiary); padding: 8px 20px; display: flex; gap: 20px; align-items: center; z-index: 1000; font-size: 12px; }
 
     @media (max-width: 768px) {
       body { padding: 0 8px; }
@@ -98,9 +97,8 @@
       // INCOME: KBRI
       const [kbriQ, setKbriQ] = useState(70); const [kbriV, setKbriV] = useState(850);
 
-      // INCOME: Contingency
-      const [pReg, setPReg] = useState(44);
-      const [contPP, setContPP] = useState(600); const [contUsage, setContUsage] = useState(0);
+      // EXPENSES: Contingency (now in expenses as % of revenue)
+      const [contingencyPct, setContingencyPct] = useState(0);
 
       // EXPENSES: Consumption per day (Thai breakdown by duration)
       const [t1c, setT1c] = useState(400); const [t2c, setT2c] = useState(800); const [t3c, setT3c] = useState(1200);
@@ -117,28 +115,22 @@
       const [ctDinnerCruise, setCtDinnerCruise] = useState(850);
       const [ctHeadcount, setCtHeadcount] = useState(30);
 
-      // EXPENSES: Souvenir
-      const [souvP, setSouvP] = useState(400);
-      const [souvN, setSouvN] = useState(44);
+      // EXPENSES: Seminar Kit (formerly Souvenir)
+      const [semKitP, setSemKitP] = useState(400);
+      const [semKitN, setSemKitN] = useState(44);
 
-      // EXPENSES: Hotel panitia
+      // HOTEL & SPECIAL SOUVENIR (moved to benefits section)
       const [hotelPPN, setHotelPPN] = useState(700); const [hotelN, setHotelN] = useState(4); const [hotelCap, setHotelCap] = useState(2);
+      const [souvP, setSouvP] = useState(400); const [souvN, setSouvN] = useState(44);
 
       // EXPENSES: Custom
       const [customExpenses, setCustomExpenses] = useState([]);
 
-      // OTHER
-      const [ppidk_perm_split, setPpidk_perm_split] = useState(30);
+      // BENEFITS: Custom
       const [customBenefits, setCustomBenefits] = useState([]);
-      const [exchangeRate, setExchangeRate] = useState(null);
 
-      // Fetch exchange rate
-      useEffect(() => {
-        fetch("https://api.frankfurter.app/latest?from=THB&to=IDR")
-          .then(r => r.json())
-          .then(d => setExchangeRate(d.rates?.IDR || 500))
-          .catch(() => setExchangeRate(500));
-      }, []);
+      // PROFIT SPLIT
+      const [ppidk_perm_split, setPpidk_perm_split] = useState(30);
 
       // Main calculations
       const calc = useMemo(() => {
@@ -160,15 +152,14 @@
         const revY = yn * yp, revPth = pthn * pthp, revPnon = pnonn * pnonp;
         const regRevenue = revT1 + revT2 + revT3 + revY + revPth + revPnon;
 
-        // INCOME: Total (before contingency)
-        const totalIncomeBeforeCont = regRevenue + ppidk + sponsor + (customIncomes.reduce((s, c) => s + c.total, 0) || 0);
+        // INCOME: Total (before KBRI & custom)
+        const totalIncomeBeforeKbri = regRevenue + ppidk + sponsor + (customIncomes.reduce((s, c) => s + c.total, 0) || 0);
 
-        // INCOME: Contingency collected
-        const contCollected = totalPaying * contPP;
-        const contUsed = contCollected * (contUsage / 100);
+        // INCOME: KBRI subsidy
+        const totalIncome = totalIncomeBeforeKbri + subsidiTotal;
 
-        // INCOME: KBRI subsidy counts as income
-        const totalIncome = totalIncomeBeforeCont + subsidiTotal + contUsed;
+        // EXPENSES: Contingency (% of total income)
+        const contingencyExp = totalIncome * (contingencyPct / 100);
 
         // EXPENSES: Consumption
         const expT1 = t1n * t1c, expT2 = t2n * t2c, expT3 = t3n * t3c;
@@ -181,40 +172,46 @@
         // EXPENSES: City tour
         const cityTourTotal = (ctTransport + ctTemple + ctDinnerCruise) * ctHeadcount;
 
-        // EXPENSES: Souvenir
-        const souvTotal = souvN * souvP;
-
-        // EXPENSES: Hotel
-        const rooms = Math.ceil(pTotal / Math.max(1, hotelCap));
-        const hotelTotal = rooms * hotelPPN * hotelN;
+        // EXPENSES: Seminar Kit
+        const semKitTotal = semKitN * semKitP;
 
         // EXPENSES: Custom
         const customExpTotal = customExpenses.reduce((s, c) => s + c.total, 0) || 0;
 
-        // TOTAL EXPENSES
-        const totalExpenses = consumptionTotal + venueExp + cityTourTotal + souvTotal + hotelTotal + customExpTotal;
+        // TOTAL EXPENSES (excluding hotel & special souvenir which are benefits)
+        const totalExpenses = consumptionTotal + venueExp + cityTourTotal + semKitTotal + customExpTotal + contingencyExp;
 
-        // NILAI AKHIR (before benefits deduction)
+        // NILAI AKHIR
         const nilaiAkhir = totalIncome - totalExpenses;
 
-        // Benefits (hotel + souvenir + custom benefits)
+        // BENEFITS: Hotel
+        const rooms = Math.ceil(pTotal / Math.max(1, hotelCap));
+        const hotelTotal = rooms * hotelPPN * hotelN;
+
+        // BENEFITS: Special Souvenir
+        const souvTotal = souvN * souvP;
+
+        // BENEFITS: Custom
         const customBenefitTotal = customBenefits.reduce((s, c) => s + c.total, 0) || 0;
+
+        // TOTAL BENEFITS
         const totalBenefits = hotelTotal + souvTotal + customBenefitTotal;
 
-        // ALOKASI SURPLUS (surplus after benefits)
+        // ALOKASI SURPLUS
         const alokasiSurplus = nilaiAkhir - totalBenefits;
 
         return {
           tTotal, pTotal, totalPaying, usedByThai, sisaKuota, pnonGratis, pnonBayarVenue, venuePayers, subsidiTotal,
-          revT1, revT2, revT3, revY, revPth, revPnon, regRevenue, totalIncomeBeforeCont, contCollected, contUsed, totalIncome,
-          expT1, expT2, expT3, expYearN, expPan, consumptionTotal, venueExp, cityTourTotal, souvTotal, rooms, hotelTotal, customExpTotal,
-          totalExpenses, nilaiAkhir, totalBenefits, alokasiSurplus
+          revT1, revT2, revT3, revY, revPth, revPnon, regRevenue, totalIncomeBeforeKbri, totalIncome,
+          expT1, expT2, expT3, expYearN, expPan, consumptionTotal, venueExp, cityTourTotal, semKitTotal, customExpTotal, contingencyExp,
+          totalExpenses, nilaiAkhir, rooms, hotelTotal, souvTotal, customBenefitTotal, totalBenefits, alokasiSurplus
         };
-      }, [t1n,t1p,t2n,t2p,t3n,t3p,yn,yp,pthn,pthp,pnonn,pnonp,ppidk,sponsor,customIncomes,kbriQ,kbriV,t1c,t2c,t3c,c3,venuePerPax,ctTransport,ctTemple,ctDinnerCruise,ctHeadcount,souvP,souvN,hotelPPN,hotelN,hotelCap,customExpenses,pReg,contPP,contUsage,customBenefits,ppidk_perm_split]);
+      }, [t1n,t1p,t2n,t2p,t3n,t3p,yn,yp,pthn,pthp,pnonn,pnonp,ppidk,sponsor,customIncomes,kbriQ,kbriV,t1c,t2c,t3c,c3,venuePerPax,ctTransport,ctTemple,ctDinnerCruise,ctHeadcount,semKitP,semKitN,hotelPPN,hotelN,hotelCap,souvP,souvN,customExpenses,contingencyPct,customBenefits,ppidk_perm_split]);
 
       const isDeficit = calc.nilaiAkhir < 0;
+      const isAlokDeficit = calc.alokasiSurplus < 0;
 
-      return h("div", { style: { fontFamily: "var(--font-sans)", background: "var(--color-background-tertiary)", minHeight: "100vh", paddingBottom: 80 } },
+      return h("div", { style: { fontFamily: "var(--font-sans)", background: "var(--color-background-tertiary)", minHeight: "100vh" } },
         h("div", { style: { background: "var(--color-background-primary)", borderBottom: "0.5px solid var(--color-border-tertiary)", padding: "12px 20px" } },
           h("div", { style: { fontSize: 16, fontWeight: 500, color: "var(--color-text-primary)" } }, "Kalkulator Anggaran Simposium"),
           h("div", { style: { fontSize: 12, color: "var(--color-text-tertiary)" } }, "PPIDK Asia Oceania 2026 · PERMITHA · semua nilai dapat diubah")
@@ -275,15 +272,7 @@
                 h("input", { type: "number", min: "0", value: pnonp, onChange: e => setPnonp(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11, padding: "4px 6px" } })
               ),
 
-              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "5. Contingency (Biaya Tambahan Peserta)"),
-              h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 6 } }, "Terkumpul: ", calc.totalPaying, " pax × ฿", formatCurrency(contPP), " = ฿", formatCurrency(calc.contCollected)),
-              h("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 12 } },
-                h("input", { type: "number", min: "0", max: "100", value: contPP, onChange: e => setContPP(Math.max(0, +e.target.value || 0)), style: { width: 80, textAlign: "right", fontSize: 11 } }),
-                h("input", { type: "range", min: "0", max: "100", step: "5", value: contUsage, onChange: e => setContUsage(+e.target.value), style: { flex: 1 } }),
-                h("span", { style: { fontSize: 11, color: "var(--color-text-secondary)" } }, contUsage + "%")
-              ),
-
-              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "6. Biaya Tambahan (+)"),
+              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "5. Biaya Tambahan (+)"),
               customIncomes.map((c, i) =>
                 h("div", { key: i, style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 40px", gap: 6, marginBottom: 6, alignItems: "flex-end" } },
                   h("input", { type: "text", placeholder: "Deskripsi", value: c.desc, onChange: e => { const nc = [...customIncomes]; nc[i].desc = e.target.value; setCustomIncomes(nc); }, style: { fontSize: 11, padding: "4px 6px" } }),
@@ -316,19 +305,19 @@
               h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 8 } }, "Non-Thailand & Panitia (3 hari)"),
               h("input", { type: "number", min: "0", value: c3, onChange: e => setC3(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11, marginBottom: 12, padding: "4px 6px" } }),
 
-              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "2. Souvenir"),
+              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "2. Seminar Kit"),
               h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 } },
                 h("div", null,
                   h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Harga/orang"),
-                  h("input", { type: "number", min: "0", value: souvP, onChange: e => setSouvP(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11 } })
+                  h("input", { type: "number", min: "0", value: semKitP, onChange: e => setSemKitP(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11 } })
                 ),
                 h("div", null,
                   h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 4 } }, "Jumlah"),
-                  h("input", { type: "number", min: "0", value: souvN, onChange: e => setSouvN(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11 } })
+                  h("input", { type: "number", min: "0", value: semKitN, onChange: e => setSemKitN(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11 } })
                 )
               ),
 
-              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "3. Venue (non-subsidi)"),
+              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "3. Venue"),
               h("input", { type: "number", min: "0", value: venuePerPax, onChange: e => setVenuePerPax(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11, marginBottom: 12, padding: "4px 6px" } }),
 
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "4. City Tour"),
@@ -349,7 +338,14 @@
               h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 8 } }, "Jumlah orang ikut"),
               h("input", { type: "number", min: "0", value: ctHeadcount, onChange: e => setCtHeadcount(Math.max(0, +e.target.value || 0)), style: { width: "100%", textAlign: "right", fontSize: 11, marginBottom: 12, padding: "4px 6px" } }),
 
-              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "5. Pengeluaran Tambahan (+)"),
+              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "5. Biaya Darurat (%)"),
+              h("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 12 } },
+                h("input", { type: "number", min: "0", max: "100", value: contingencyPct, onChange: e => setContingencyPct(+e.target.value || 0), style: { width: 80, textAlign: "right", fontSize: 11 } }),
+                h("input", { type: "range", min: "0", max: "100", step: "1", value: contingencyPct, onChange: e => setContingencyPct(+e.target.value), style: { flex: 1 } }),
+                h("span", { style: { fontSize: 11, color: "var(--color-text-secondary)" } }, contingencyPct + "%")
+              ),
+
+              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10, color: "var(--color-text-primary)" } }, "6. Pengeluaran Tambahan (+)"),
               customExpenses.map((c, i) =>
                 h("div", { key: i, style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 40px", gap: 6, marginBottom: 6, alignItems: "flex-end" } },
                   h("input", { type: "text", placeholder: "Deskripsi", value: c.desc, onChange: e => { const nc = [...customExpenses]; nc[i].desc = e.target.value; setCustomExpenses(nc); }, style: { fontSize: 11, padding: "4px 6px" } }),
@@ -401,10 +397,6 @@
                 h("div", null, "Thai: ", calc.usedByThai, " pax"),
                 h("div", null, "Pan. Non-Thai: ", calc.pnonGratis, " pax (gratis)")
               ),
-              h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
-                h("span", null, "Contingency: "),
-                h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.contUsed))
-              ),
               customIncomes.length > 0 ? customIncomes.map((c, i) =>
                 h("div", { key: i, style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
                   h("span", null, c.desc),
@@ -419,22 +411,41 @@
                 h("span", null, "Konsumsi: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.consumptionTotal))
               ),
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, "Thai 1hr: ", t1n, " × ฿", formatCurrency(t1c), " = ฿", formatCurrency(calc.expT1)),
+                h("div", null, "Thai 2hr: ", t2n, " × ฿", formatCurrency(t2c), " = ฿", formatCurrency(calc.expT2)),
+                h("div", null, "Thai 3hr: ", t3n, " × ฿", formatCurrency(t3c), " = ฿", formatCurrency(calc.expT3)),
+                h("div", null, "Non-Thai: ", yn, " × ฿", formatCurrency(c3), " = ฿", formatCurrency(calc.expYearN)),
+                h("div", null, "Panitia: ", calc.pTotal, " × ฿", formatCurrency(c3), " = ฿", formatCurrency(calc.expPan))
+              ),
               h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
                 h("span", null, "Venue: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.venueExp))
+              ),
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, "Pembayar: ", calc.venuePayers, " pax × ฿", formatCurrency(venuePerPax), " = ฿", formatCurrency(calc.venueExp))
               ),
               h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
                 h("span", null, "City Tour: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.cityTourTotal))
               ),
-              h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
-                h("span", null, "Souvenir: "),
-                h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.souvTotal))
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, "(", ctTransport, " + ", ctTemple, " + ", ctDinnerCruise, ") × ", ctHeadcount, " = ฿", formatCurrency(calc.cityTourTotal))
               ),
               h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
-                h("span", null, "Hotel Panitia: "),
-                h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.hotelTotal))
+                h("span", null, "Seminar Kit: "),
+                h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.semKitTotal))
               ),
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, semKitN, " × ฿", formatCurrency(semKitP), " = ฿", formatCurrency(calc.semKitTotal))
+              ),
+              calc.contingencyExp > 0 ? h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
+                h("span", null, "Biaya Darurat: "),
+                h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.contingencyExp))
+              ) : null,
+              calc.contingencyExp > 0 ? h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, "฿", formatCurrency(calc.totalIncome), " × ", contingencyPct, "% = ฿", formatCurrency(calc.contingencyExp))
+              ) : null,
               customExpenses.length > 0 ? customExpenses.map((c, i) =>
                 h("div", { key: i, style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
                   h("span", null, c.desc),
@@ -452,45 +463,52 @@
               );
             })(),
 
-            // Ringkasan Akhir
+            // Ringkasan Akhir (only if not deficit)
             isDeficit ? null : h(Section, { title: "Ringkasan Akhir", accent: "green" },
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Peserta: ", calc.totalPaying, " orang"),
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pendapatan: ฿", formatCurrency(calc.totalIncome)),
-              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pengeluaran: ฿", formatCurrency(calc.totalExpenses))
+              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pengeluaran: ฿", formatCurrency(calc.totalExpenses)),
+              h("div", { style: { fontSize: 12, fontWeight: 500 } }, "Nilai Akhir: ฿" + (calc.nilaiAkhir >= 0 ? "+" : "-") + formatCurrency(calc.nilaiAkhir))
             ),
 
-            // Hotel & Souvenir details (only if surplus)
+            // Keuntungan Khusus Panitia
             isDeficit ? null : h(Section, { title: "Keuntungan Khusus Panitia", accent: "pink" },
               h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
                 h("span", null, "Hotel: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.hotelTotal))
               ),
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, calc.rooms, " kamar × ฿", formatCurrency(hotelPPN), " × ", hotelN, " malam = ฿", formatCurrency(calc.hotelTotal))
+              ),
               h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
-                h("span", null, "Souvenir: "),
+                h("span", null, "Souvenir Khusus: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.souvTotal))
               ),
-              customBenefits.length > 0 ? customBenefits.map((c, i) =>
-                h("div", { key: i, style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, souvN, " × ฿", formatCurrency(souvP), " = ฿", formatCurrency(calc.souvTotal))
+              ),
+              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Tambahan Keuntungan"),
+              customBenefits.length === 0 ? h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 8 } }, "Tidak ada") : customBenefits.map((c, i) =>
+                h("div", { key: i, style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 6, marginBottom: 6 } },
                   h("span", null, c.desc),
                   h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(c.total))
                 )
-              ) : null,
-              h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingTop: 8, fontWeight: 500, color: "#993556" } },
-                h("span", null, "Total: "),
+              ),
+              h("button", { onClick: () => setCustomBenefits([...customBenefits, { desc: "", qty: 0, price: 0, total: 0 }]), style: { width: "100%", padding: "6px", fontSize: 11, border: "1px solid var(--color-border-tertiary)", background: "var(--color-background-secondary)", borderRadius: 4, cursor: "pointer", marginBottom: 10 } }, "+ Tambah keuntungan"),
+              h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingTop: 8, fontWeight: 500, color: "#993556", borderTop: "0.5px solid var(--color-border-tertiary)" } },
+                h("span", null, "Total Keuntungan: "),
                 h("span", null, "฿" + formatCurrency(calc.totalBenefits))
               )
             ),
 
             // Alokasi Surplus
-            isDeficit ? null : h(Section, { title: "Alokasi Surplus", accent: calc.alokasiSurplus >= 0 ? "green" : "red" },
-              h("div", { style: { fontSize: 13, fontWeight: 500, display: "flex", justifyContent: "space-between", padding: "8px 0" } },
-                h("span", null, "Nilai Akhir - Keuntungan Panitia: "),
-                h("span", { style: { color: calc.alokasiSurplus >= 0 ? "#27500A" : "#791F1F" } }, "฿" + formatCurrency(calc.alokasiSurplus))
-              )
+            isDeficit ? null : h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, padding: "10px 12px", borderRadius: "var(--border-radius-md)", background: isAlokDeficit ? "#FCEBEB" : "#EAF3DE", color: isAlokDeficit ? "#791F1F" : "#27500A", marginBottom: 12 } },
+              h("span", null, "Alokasi Surplus " + (isAlokDeficit ? "DEFISIT" : "")),
+              h("span", null, isAlokDeficit ? "- ฿" + formatCurrency(calc.alokasiSurplus) : "+ ฿" + formatCurrency(calc.alokasiSurplus))
             ),
 
             // Profit sharing (only if alokasi positive)
-            isDeficit || calc.alokasiSurplus < 0 ? null : h(Section, { title: "Pembagian Hasil PPIDK/PERMITHA", accent: "purple" },
+            isDeficit || isAlokDeficit ? null : h(Section, { title: "Pembagian Hasil PPIDK/PERMITHA", accent: "purple" },
               h("div", { style: { marginBottom: 12 } },
                 h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 6 } }, "PPIDK: " + ppidk_perm_split + "%  |  PERMITHA: " + (100 - ppidk_perm_split) + "%"),
                 h("input", { type: "range", min: "0", max: "100", value: ppidk_perm_split, onChange: e => setPpidk_perm_split(+e.target.value), style: { width: "100%", marginBottom: 8 } }),
@@ -507,31 +525,6 @@
               )
             )
           )
-        ),
-        // STICKY FOOTER: Live exchange rate & IDR conversions
-        h("div", { className: "sticky-footer", style: { position: "fixed", bottom: 0, left: 0, right: 0, background: "white", borderTop: "1px solid var(--color-border-tertiary)", padding: "8px 16px", display: "flex", gap: 16, alignItems: "center", zIndex: 1000, fontSize: 11, overflowX: "auto", whiteSpace: "nowrap", boxShadow: "0 -2px 8px rgba(0,0,0,0.05)" } },
-          h("div", { style: { display: "flex", alignItems: "center", gap: 6, paddingRight: 12, borderRight: "1px solid var(--color-border-tertiary)" } },
-            h("span", { style: { fontSize: 10, color: "var(--color-text-tertiary)", fontWeight: 500, textTransform: "uppercase" } }, "Rate"),
-            h("span", { style: { fontWeight: 600, color: "#185FA5" } }, exchangeRate ? "฿1 = Rp" + Math.round(exchangeRate).toLocaleString("id-ID") : "Loading…")
-          ),
-          h("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
-            h("span", { style: { fontSize: 10, color: "var(--color-text-tertiary)", fontWeight: 500, textTransform: "uppercase" } }, "Pendapatan"),
-            h("span", { style: { fontWeight: 500, color: "#3B6D11" } }, exchangeRate ? "Rp" + formatCurrency(calc.totalIncome * exchangeRate) : "—")
-          ),
-          h("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
-            h("span", { style: { fontSize: 10, color: "var(--color-text-tertiary)", fontWeight: 500, textTransform: "uppercase" } }, "Pengeluaran"),
-            h("span", { style: { fontWeight: 500, color: "#A32D2D" } }, exchangeRate ? "Rp" + formatCurrency(calc.totalExpenses * exchangeRate) : "—")
-          ),
-          h("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
-            h("span", { style: { fontSize: 10, color: "var(--color-text-tertiary)", fontWeight: 500, textTransform: "uppercase" } }, isDeficit ? "Defisit" : "Surplus"),
-            h("span", { style: { fontWeight: 600, color: isDeficit ? "#791F1F" : "#27500A", padding: "2px 8px", borderRadius: 4, background: isDeficit ? "#FCEBEB" : "#EAF3DE" } },
-              exchangeRate ? (isDeficit ? "-Rp" : "+Rp") + formatCurrency(calc.nilaiAkhir * exchangeRate) : "—"
-            )
-          ),
-          calc.alokasiSurplus > 0 && !isDeficit ? h("div", { style: { display: "flex", alignItems: "center", gap: 6, paddingLeft: 12, borderLeft: "1px solid var(--color-border-tertiary)" } },
-            h("span", { style: { fontSize: 10, color: "var(--color-text-tertiary)", fontWeight: 500, textTransform: "uppercase" } }, "Alokasi"),
-            h("span", { style: { fontWeight: 500, color: "#3C3489" } }, exchangeRate ? "Rp" + formatCurrency(calc.alokasiSurplus * exchangeRate) : "—")
-          ) : null
         )
       );
     }

@@ -442,8 +442,6 @@
             h(Section, { title: "Ringkasan Akhir", accent: "green" },
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Peserta: ", calc.totalPaying, " orang"),
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pendapatan (Cash): ฿", formatCurrency(calc.totalIncomeBeforeCustom)),
-              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Benefit-in-kind: ฿", formatCurrency(calc.totalKbriSubsidy)),
-              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pendapatan (incl. KBRI): ฿", formatCurrency(calc.totalIncome)),
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pengeluaran: ฿", formatCurrency(calc.totalExpenses)),
               h("div", { style: { fontSize: 12, fontWeight: 500 } }, "Nilai Akhir: ฿" + (calc.nilaiAkhir >= 0 ? "+" : "-") + formatCurrency(calc.nilaiAkhir))
             ),

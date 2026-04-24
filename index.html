@@ -330,18 +330,30 @@
                 )
               )
             ),
-            ...(isDeficit ? [h(Section, { title: `Untuk menutup defisit ฿${formatCurrency(c.totalSurplus)}:`, accent: "red" },
-              h("div", { style: { fontSize: 12, color: "var(--color-text-secondary)" } },
-                [
-                  { label: "peserta non-Thailand", margin: c.margY },
-                  { label: "peserta Thailand 3 hari", margin: c.margT3 },
-                  { label: "peserta Thailand 1 hari", margin: c.margT1 }
-                ].map(({ label, margin }) => {
-                  const needed = Math.ceil(Math.abs(c.totalSurplus) / Math.max(1, margin));
-                  return h("div", { key: label, style: { marginBottom: 8 } }, "Tambah minimal ", h("b", null, needed), " ", label);
-                })
-              )
-            )] : []),
+            (() => {
+              const nilaiAkhir = c.revenue - c.totalCost;
+              const isAkhirDeficit = nilaiAkhir < 0;
+              const absValue = Math.abs(nilaiAkhir);
+              const adjustments = [
+                { label: "peserta non-Thailand", margin: c.margY },
+                { label: "peserta Thailand 3 hari", margin: c.margT3 },
+                { label: "peserta Thailand 1 hari", margin: c.margT1 }
+              ];
+
+              return isAkhirDeficit || nilaiAkhir > 0 ? h(Section, { title: isAkhirDeficit ? `Untuk menutup defisit ฿${formatCurrency(nilaiAkhir)}:` : `Surplus ฿${formatCurrency(nilaiAkhir)} bisa dikurangi:`, accent: isAkhirDeficit ? "red" : "green" },
+                h("div", { style: { fontSize: 12, color: "var(--color-text-secondary)" } },
+                  adjustments.map(({ label, margin }) => {
+                    const needed = Math.ceil(absValue / Math.max(1, margin));
+                    return h("div", { key: label, style: { marginBottom: 8 } },
+                      isAkhirDeficit ? "+ Tambah minimal " : "- Kurangi minimal ",
+                      h("b", null, needed),
+                      " ",
+                      label
+                    );
+                  })
+                )
+              ) : null;
+            })(),
             h(Section, { title: "Ringkasan akhir", accent: isDeficit ? "red" : "green" },
               h("div", { style: { fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", marginBottom: 10, paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)" } }, "Total peserta hadir"),
               h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0" } },

@@ -93,7 +93,7 @@
       const [contingencyPct, setContingencyPct] = useState(0);
 
       // EXPENSES: Consumption (daily budgets)
-      const [dailyBudget, setDailyBudget] = useState(250); // Same daily rate for all
+      const [dailyBudget, setDailyBudget] = useState(250);
 
       // EXPENSES: Venue (only for those NOT subsidized)
       const [venuePerPax, setVenuePerPax] = useState(850);
@@ -401,9 +401,17 @@
                 h("span", null, "Konsumsi: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.consumptionTotal))
               ),
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, "Hari 1 (less KBRI): ", calc.day1Consumers - calc.kbriSubsidy, " × ฿", formatCurrency(dailyBudget), " = ฿", formatCurrency(calc.day1Expense)),
+                h("div", null, "Hari 2: ", calc.day2Consumers, " × ฿", formatCurrency(dailyBudget), " = ฿", formatCurrency(calc.day2Expense)),
+                h("div", null, "Hari 3: ", calc.day3Consumers, " × ฿", formatCurrency(dailyBudget), " = ฿", formatCurrency(calc.day3Expense))
+              ),
               h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
                 h("span", null, "Venue: "),
                 h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.venueExp))
+              ),
+              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
+                h("div", null, "Pembayar: ", calc.venuePayersCount, " pax × ฿", formatCurrency(venuePerPax), " = ฿", formatCurrency(calc.venueExp))
               ),
               h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
                 h("span", null, "City Tour: "),

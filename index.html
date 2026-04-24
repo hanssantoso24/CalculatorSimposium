@@ -22,6 +22,8 @@
     body { font-family: var(--font-sans); background: var(--color-background-tertiary); color: var(--color-text-primary); }
     input[type="number"] { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 6px 8px; font-family: var(--font-sans); }
     input[type="number"]:focus { outline: none; border-color: #378ADD; box-shadow: 0 0 0 2px rgba(55, 138, 221, 0.1); }
+    input[type="text"] { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 6px 8px; font-family: var(--font-sans); }
+    input[type="text"]:focus { outline: none; border-color: #378ADD; box-shadow: 0 0 0 2px rgba(55, 138, 221, 0.1); }
     table { width: 100%; border-collapse: collapse; }
     th, td { text-align: left; padding: 4px; }
     #root { display: flex; flex-direction: column; min-height: 100vh; }
@@ -97,7 +99,7 @@
       // INCOME: KBRI
       const [kbriQ, setKbriQ] = useState(70); const [kbriV, setKbriV] = useState(850);
 
-      // EXPENSES: Contingency (now in expenses as % of revenue)
+      // EXPENSES: Contingency (% of revenue)
       const [contingencyPct, setContingencyPct] = useState(0);
 
       // EXPENSES: Consumption per day (Thai breakdown by duration)
@@ -115,19 +117,18 @@
       const [ctDinnerCruise, setCtDinnerCruise] = useState(850);
       const [ctHeadcount, setCtHeadcount] = useState(30);
 
-      // EXPENSES: Seminar Kit (formerly Souvenir)
+      // EXPENSES: Seminar Kit
       const [semKitP, setSemKitP] = useState(400);
       const [semKitN, setSemKitN] = useState(44);
-
-      // HOTEL & SPECIAL SOUVENIR (moved to benefits section)
-      const [hotelPPN, setHotelPPN] = useState(700); const [hotelN, setHotelN] = useState(4); const [hotelCap, setHotelCap] = useState(2);
-      const [souvP, setSouvP] = useState(400); const [souvN, setSouvN] = useState(44);
 
       // EXPENSES: Custom
       const [customExpenses, setCustomExpenses] = useState([]);
 
-      // BENEFITS: Custom
-      const [customBenefits, setCustomBenefits] = useState([]);
+      // KEUNTUNGAN KHUSUS: Now fully customizable
+      const [keuntunganItems, setKeuntunganItems] = useState([
+        { desc: "Hotel", qty: 20, price: 700, total: 14000 },
+        { desc: "Souvenir Khusus", qty: 44, price: 400, total: 17600 }
+      ]);
 
       // PROFIT SPLIT
       const [ppidk_perm_split, setPpidk_perm_split] = useState(30);
@@ -166,7 +167,7 @@
         const expYearN = yn * c3, expPan = pTotal * c3;
         const consumptionTotal = expT1 + expT2 + expT3 + expYearN + expPan;
 
-        // EXPENSES: Venue (non-subsidized)
+        // EXPENSES: Venue
         const venueExp = venuePayers * venuePerPax;
 
         // EXPENSES: City tour
@@ -178,38 +179,28 @@
         // EXPENSES: Custom
         const customExpTotal = customExpenses.reduce((s, c) => s + c.total, 0) || 0;
 
-        // TOTAL EXPENSES (excluding hotel & special souvenir which are benefits)
+        // TOTAL EXPENSES
         const totalExpenses = consumptionTotal + venueExp + cityTourTotal + semKitTotal + customExpTotal + contingencyExp;
 
         // NILAI AKHIR
         const nilaiAkhir = totalIncome - totalExpenses;
 
-        // BENEFITS: Hotel
-        const rooms = Math.ceil(pTotal / Math.max(1, hotelCap));
-        const hotelTotal = rooms * hotelPPN * hotelN;
+        // KEUNTUNGAN KHUSUS PANITIA: Sum of all customizable items
+        const totalKeuntungan = keuntunganItems.reduce((s, c) => s + c.total, 0) || 0;
 
-        // BENEFITS: Special Souvenir
-        const souvTotal = souvN * souvP;
-
-        // BENEFITS: Custom
-        const customBenefitTotal = customBenefits.reduce((s, c) => s + c.total, 0) || 0;
-
-        // TOTAL BENEFITS
-        const totalBenefits = hotelTotal + souvTotal + customBenefitTotal;
-
-        // ALOKASI SURPLUS
-        const alokasiSurplus = nilaiAkhir - totalBenefits;
+        // SISA SURPLUS
+        const sisaSurplus = nilaiAkhir - totalKeuntungan;
 
         return {
           tTotal, pTotal, totalPaying, usedByThai, sisaKuota, pnonGratis, pnonBayarVenue, venuePayers, subsidiTotal,
           revT1, revT2, revT3, revY, revPth, revPnon, regRevenue, totalIncomeBeforeKbri, totalIncome,
           expT1, expT2, expT3, expYearN, expPan, consumptionTotal, venueExp, cityTourTotal, semKitTotal, customExpTotal, contingencyExp,
-          totalExpenses, nilaiAkhir, rooms, hotelTotal, souvTotal, customBenefitTotal, totalBenefits, alokasiSurplus
+          totalExpenses, nilaiAkhir, totalKeuntungan, sisaSurplus
         };
-      }, [t1n,t1p,t2n,t2p,t3n,t3p,yn,yp,pthn,pthp,pnonn,pnonp,ppidk,sponsor,customIncomes,kbriQ,kbriV,t1c,t2c,t3c,c3,venuePerPax,ctTransport,ctTemple,ctDinnerCruise,ctHeadcount,semKitP,semKitN,hotelPPN,hotelN,hotelCap,souvP,souvN,customExpenses,contingencyPct,customBenefits,ppidk_perm_split]);
+      }, [t1n,t1p,t2n,t2p,t3n,t3p,yn,yp,pthn,pthp,pnonn,pnonp,ppidk,sponsor,customIncomes,kbriQ,kbriV,t1c,t2c,t3c,c3,venuePerPax,ctTransport,ctTemple,ctDinnerCruise,ctHeadcount,semKitP,semKitN,customExpenses,contingencyPct,keuntunganItems,ppidk_perm_split]);
 
       const isDeficit = calc.nilaiAkhir < 0;
-      const isAlokDeficit = calc.alokasiSurplus < 0;
+      const isSisaDeficit = calc.sisaSurplus < 0;
 
       return h("div", { style: { fontFamily: "var(--font-sans)", background: "var(--color-background-tertiary)", minHeight: "100vh" } },
         h("div", { style: { background: "var(--color-background-primary)", borderBottom: "0.5px solid var(--color-border-tertiary)", padding: "12px 20px" } },
@@ -454,75 +445,67 @@
               ) : null
             ),
 
-            // Nilai Akhir
-            (() => {
-              const isDeficit = calc.nilaiAkhir < 0;
-              return h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, padding: "10px 12px", borderRadius: "var(--border-radius-md)", background: isDeficit ? "#FCEBEB" : "#EAF3DE", color: isDeficit ? "#791F1F" : "#27500A", marginBottom: 12 } },
-                h("span", null, "Nilai Akhir " + (isDeficit ? "DEFISIT" : "SURPLUS")),
-                h("span", null, isDeficit ? "- ฿" + formatCurrency(calc.nilaiAkhir) : "+ ฿" + formatCurrency(calc.nilaiAkhir))
-              );
-            })(),
-
-            // Ringkasan Akhir (only if not deficit)
-            isDeficit ? null : h(Section, { title: "Ringkasan Akhir", accent: "green" },
+            // Ringkasan Akhir (always shows)
+            h(Section, { title: "Ringkasan Akhir", accent: "green" },
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Peserta: ", calc.totalPaying, " orang"),
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pendapatan: ฿", formatCurrency(calc.totalIncome)),
               h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Total Pengeluaran: ฿", formatCurrency(calc.totalExpenses)),
               h("div", { style: { fontSize: 12, fontWeight: 500 } }, "Nilai Akhir: ฿" + (calc.nilaiAkhir >= 0 ? "+" : "-") + formatCurrency(calc.nilaiAkhir))
             ),
 
-            // Keuntungan Khusus Panitia
-            isDeficit ? null : h(Section, { title: "Keuntungan Khusus Panitia", accent: "pink" },
-              h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
-                h("span", null, "Hotel: "),
-                h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.hotelTotal))
-              ),
-              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
-                h("div", null, calc.rooms, " kamar × ฿", formatCurrency(hotelPPN), " × ", hotelN, " malam = ฿", formatCurrency(calc.hotelTotal))
-              ),
-              h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)", marginBottom: 8 } },
-                h("span", null, "Souvenir Khusus: "),
-                h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(calc.souvTotal))
-              ),
-              h("div", { style: { fontSize: 11, color: "var(--color-text-secondary)", marginLeft: 8, marginBottom: 8 } },
-                h("div", null, souvN, " × ฿", formatCurrency(souvP), " = ฿", formatCurrency(calc.souvTotal))
-              ),
-              h("div", { style: { fontSize: 12, fontWeight: 500, marginBottom: 10 } }, "Tambahan Keuntungan"),
-              customBenefits.length === 0 ? h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 8 } }, "Tidak ada") : customBenefits.map((c, i) =>
-                h("div", { key: i, style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingBottom: 6, marginBottom: 6 } },
-                  h("span", null, c.desc),
-                  h("span", { style: { fontWeight: 500 } }, "฿" + formatCurrency(c.total))
+            // Nilai Akhir badge (always shows)
+            (() => {
+              return h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, padding: "10px 12px", borderRadius: "var(--border-radius-md)", background: isDeficit ? "#FCEBEB" : "#EAF3DE", color: isDeficit ? "#791F1F" : "#27500A", marginBottom: 12 } },
+                h("span", null, "Nilai Akhir " + (isDeficit ? "DEFISIT" : "SURPLUS")),
+                h("span", null, isDeficit ? "- ฿" + formatCurrency(calc.nilaiAkhir) : "+ ฿" + formatCurrency(calc.nilaiAkhir))
+              );
+            })(),
+
+            // Alokasi Surplus section (only if not deficit)
+            isDeficit ? null : h("div", null,
+              h("div", { style: { fontSize: 13, fontWeight: 500, padding: "8px 14px", background: "#EEEDFE", borderBottom: "0.5px solid #7F77DD", marginBottom: 12, borderRadius: "var(--border-radius-md)", color: "#3C3489" } }, "Alokasi Surplus"),
+
+              // Keuntungan Khusus Panitia (fully customizable)
+              h(Section, { title: "Keuntungan Khusus Panitia", accent: "pink" },
+                keuntunganItems.map((item, i) =>
+                  h("div", { key: i, style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 40px", gap: 6, marginBottom: 8, alignItems: "flex-end" } },
+                    h("input", { type: "text", placeholder: "Deskripsi", value: item.desc, onChange: e => { const ni = [...keuntunganItems]; ni[i].desc = e.target.value; setKeuntunganItems(ni); }, style: { fontSize: 11, padding: "4px 6px" } }),
+                    h("input", { type: "number", min: "0", placeholder: "Qty", value: item.qty, onChange: e => { const ni = [...keuntunganItems]; ni[i].qty = +e.target.value || 0; ni[i].total = ni[i].qty * ni[i].price; setKeuntunganItems(ni); }, style: { fontSize: 11, padding: "4px 6px", textAlign: "right" } }),
+                    h("input", { type: "number", min: "0", placeholder: "Price", value: item.price, onChange: e => { const ni = [...keuntunganItems]; ni[i].price = +e.target.value || 0; ni[i].total = ni[i].qty * ni[i].price; setKeuntunganItems(ni); }, style: { fontSize: 11, padding: "4px 6px", textAlign: "right" } }),
+                    h("div", { style: { fontSize: 11, fontWeight: 500, textAlign: "right" } }, "฿", formatCurrency(item.total)),
+                    h("button", { onClick: () => setKeuntunganItems(keuntunganItems.filter((_, j) => j !== i)), style: { width: 40, height: 26, border: "1px solid var(--color-border-tertiary)", background: "white", borderRadius: 4, cursor: "pointer", fontSize: 12 } }, "×")
+                  )
+                ),
+                h("button", { onClick: () => setKeuntunganItems([...keuntunganItems, { desc: "", qty: 0, price: 0, total: 0 }]), style: { width: "100%", padding: "6px", fontSize: 11, border: "1px solid var(--color-border-tertiary)", background: "var(--color-background-secondary)", borderRadius: 4, cursor: "pointer", marginBottom: 10 } }, "+ Tambah keuntungan"),
+                h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingTop: 8, fontWeight: 500, color: "#993556", borderTop: "0.5px solid var(--color-border-tertiary)" } },
+                  h("span", null, "Total Keuntungan: "),
+                  h("span", null, "฿" + formatCurrency(calc.totalKeuntungan))
                 )
               ),
-              h("button", { onClick: () => setCustomBenefits([...customBenefits, { desc: "", qty: 0, price: 0, total: 0 }]), style: { width: "100%", padding: "6px", fontSize: 11, border: "1px solid var(--color-border-tertiary)", background: "var(--color-background-secondary)", borderRadius: 4, cursor: "pointer", marginBottom: 10 } }, "+ Tambah keuntungan"),
-              h("div", { style: { fontSize: 12, display: "flex", justifyContent: "space-between", paddingTop: 8, fontWeight: 500, color: "#993556", borderTop: "0.5px solid var(--color-border-tertiary)" } },
-                h("span", null, "Total Keuntungan: "),
-                h("span", null, "฿" + formatCurrency(calc.totalBenefits))
-              )
-            ),
 
-            // Alokasi Surplus
-            isDeficit ? null : h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, padding: "10px 12px", borderRadius: "var(--border-radius-md)", background: isAlokDeficit ? "#FCEBEB" : "#EAF3DE", color: isAlokDeficit ? "#791F1F" : "#27500A", marginBottom: 12 } },
-              h("span", null, "Alokasi Surplus " + (isAlokDeficit ? "DEFISIT" : "")),
-              h("span", null, isAlokDeficit ? "- ฿" + formatCurrency(calc.alokasiSurplus) : "+ ฿" + formatCurrency(calc.alokasiSurplus))
-            ),
+              // SISA SURPLUS
+              h("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 500, padding: "10px 12px", borderRadius: "var(--border-radius-md)", background: isSisaDeficit ? "#FCEBEB" : "#EAF3DE", color: isSisaDeficit ? "#791F1F" : "#27500A", marginBottom: 12 } },
+                h("span", null, "SISA SURPLUS " + (isSisaDeficit ? "DEFISIT" : "")),
+                h("span", null, isSisaDeficit ? "- ฿" + formatCurrency(calc.sisaSurplus) : "+ ฿" + formatCurrency(calc.sisaSurplus))
+              ),
 
-            // Profit sharing (only if alokasi positive)
-            isDeficit || isAlokDeficit ? null : h(Section, { title: "Pembagian Hasil PPIDK/PERMITHA", accent: "purple" },
-              h("div", { style: { marginBottom: 12 } },
-                h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 6 } }, "PPIDK: " + ppidk_perm_split + "%  |  PERMITHA: " + (100 - ppidk_perm_split) + "%"),
-                h("input", { type: "range", min: "0", max: "100", value: ppidk_perm_split, onChange: e => setPpidk_perm_split(+e.target.value), style: { width: "100%", marginBottom: 8 } }),
-                h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } },
-                  h("div", { style: { background: "#EEEDFE", borderRadius: "var(--border-radius-md)", padding: "8px 12px", textAlign: "center" } },
-                    h("div", { style: { fontSize: 11, color: "#3C3489", marginBottom: 4 } }, "PPIDK"),
-                    h("div", { style: { fontSize: 14, fontWeight: 500, color: "#3C3489" } }, "฿" + formatCurrency(calc.alokasiSurplus * ppidk_perm_split / 100))
-                  ),
-                  h("div", { style: { background: "#E6F1FB", borderRadius: "var(--border-radius-md)", padding: "8px 12px", textAlign: "center" } },
-                    h("div", { style: { fontSize: 11, color: "#185FA5", marginBottom: 4 } }, "PERMITHA"),
-                    h("div", { style: { fontSize: 14, fontWeight: 500, color: "#185FA5" } }, "฿" + formatCurrency(calc.alokasiSurplus * (100 - ppidk_perm_split) / 100))
+              // Pembagian PPIDK/PERMITHA (only if sisa surplus positive)
+              !isSisaDeficit ? h(Section, { title: "Pembagian Hasil PPIDK/PERMITHA", accent: "purple" },
+                h("div", { style: { marginBottom: 12 } },
+                  h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 6 } }, "PPIDK: " + ppidk_perm_split + "%  |  PERMITHA: " + (100 - ppidk_perm_split) + "%"),
+                  h("input", { type: "range", min: "0", max: "100", value: ppidk_perm_split, onChange: e => setPpidk_perm_split(+e.target.value), style: { width: "100%", marginBottom: 8 } }),
+                  h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } },
+                    h("div", { style: { background: "#EEEDFE", borderRadius: "var(--border-radius-md)", padding: "8px 12px", textAlign: "center" } },
+                      h("div", { style: { fontSize: 11, color: "#3C3489", marginBottom: 4 } }, "PPIDK"),
+                      h("div", { style: { fontSize: 14, fontWeight: 500, color: "#3C3489" } }, "฿" + formatCurrency(calc.sisaSurplus * ppidk_perm_split / 100))
+                    ),
+                    h("div", { style: { background: "#E6F1FB", borderRadius: "var(--border-radius-md)", padding: "8px 12px", textAlign: "center" } },
+                      h("div", { style: { fontSize: 11, color: "#185FA5", marginBottom: 4 } }, "PERMITHA"),
+                      h("div", { style: { fontSize: 14, fontWeight: 500, color: "#185FA5" } }, "฿" + formatCurrency(calc.sisaSurplus * (100 - ppidk_perm_split) / 100))
+                    )
                   )
                 )
-              )
+              ) : null
             )
           )
         )

@@ -94,6 +94,7 @@
       const [hotelPPN, setHotelPPN] = useState(700); const [hotelN, setHotelN] = useState(4); const [hotelCap, setHotelCap] = useState(2);
       const [souvP, setSouvP] = useState(400); const [souvN, setSouvN] = useState(44);
       const [contPP, setContPP] = useState(600); const [contUsage, setContUsage] = useState(0);
+      const [manualAdj, setManualAdj] = useState(null);
 
       const c = useMemo(() => {
         const tTotal = t1n + t2n + t3n; const pTotal = pthn + pnonn; const totalPaying = tTotal + yn + pTotal;
@@ -333,26 +334,82 @@
             (() => {
               const nilaiAkhir = c.revenue - c.totalCost;
               const isAkhirDeficit = nilaiAkhir < 0;
-              const absValue = Math.abs(nilaiAkhir);
-              const adjustments = [
-                { label: "peserta non-Thailand", margin: c.margY },
-                { label: "peserta Thailand 3 hari", margin: c.margT3 },
-                { label: "peserta Thailand 1 hari", margin: c.margT1 }
-              ];
+              const target = Math.abs(nilaiAkhir);
+              if (target === 0) return null;
 
-              return isAkhirDeficit || nilaiAkhir > 0 ? h(Section, { title: isAkhirDeficit ? `Untuk menutup defisit ฿${formatCurrency(nilaiAkhir)}:` : `Surplus ฿${formatCurrency(nilaiAkhir)} bisa dikurangi:`, accent: isAkhirDeficit ? "red" : "green" },
-                h("div", { style: { fontSize: 12, color: "var(--color-text-secondary)" } },
-                  adjustments.map(({ label, margin }) => {
-                    const needed = Math.ceil(absValue / Math.max(1, margin));
-                    return h("div", { key: label, style: { marginBottom: 8 } },
-                      isAkhirDeficit ? "+ Tambah minimal " : "- Kurangi minimal ",
-                      h("b", null, needed),
-                      " ",
-                      label
-                    );
-                  })
+              const margins = { y: c.margY, t3: c.margT3, t1: c.margT1, pan: c.margPth };
+              const autoAdj = (() => {
+                const share = target / 4;
+                return {
+                  y: Math.max(0, Math.ceil(share / Math.max(1, margins.y))),
+                  t3: Math.max(0, Math.ceil(share / Math.max(1, margins.t3))),
+                  t1: Math.max(0, Math.ceil(share / Math.max(1, margins.t1))),
+                  pan: Math.max(0, Math.ceil(share / Math.max(1, margins.pan)))
+                };
+              })();
+              const adj = manualAdj || autoAdj;
+
+              const handleAdjChange = (key, newValue) => {
+                const v = Math.max(0, newValue);
+                const contrib = v * margins[key];
+                const remaining = Math.max(0, target - contrib);
+                const otherShare = remaining / 3;
+                const newAdj = { ...adj, [key]: v };
+                for (const k of ["y", "t3", "t1", "pan"]) {
+                  if (k !== key) {
+                    newAdj[k] = Math.max(0, Math.ceil(otherShare / Math.max(1, margins[k])));
+                  }
+                }
+                setManualAdj(newAdj);
+              };
+
+              const totalImpact = adj.y * margins.y + adj.t3 * margins.t3 + adj.t1 * margins.t1 + adj.pan * margins.pan;
+              const rows = [
+                { key: "y", label: "Peserta non-Thailand" },
+                { key: "t3", label: "Peserta Thailand 3 hari" },
+                { key: "t1", label: "Peserta Thailand 1 hari" },
+                { key: "pan", label: "Panitia" }
+              ];
+              const btnStyle = { width: 26, height: 26, border: "1px solid var(--color-border-tertiary)", background: "white", borderRadius: 4, cursor: "pointer", fontSize: 14, fontWeight: 500, color: "var(--color-text-primary)", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 };
+
+              return h(Section, { title: isAkhirDeficit ? `Untuk menutup defisit ฿${formatCurrency(nilaiAkhir)}:` : `Surplus ฿${formatCurrency(nilaiAkhir)} bisa dikurangi:`, accent: isAkhirDeficit ? "red" : "green" },
+                h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", marginBottom: 12 } },
+                  isAkhirDeficit ? "Kombinasi peserta/panitia yang perlu ditambah — ubah salah satu, sisanya otomatis menyesuaikan" : "Kombinasi peserta/panitia yang bisa dikurangi — ubah salah satu, sisanya otomatis menyesuaikan"
+                ),
+                rows.map(({ key, label }) =>
+                  h("div", { key, style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 10 } },
+                    h("div", { style: { fontSize: 12, flex: 1, color: "var(--color-text-primary)" } },
+                      (isAkhirDeficit ? "+ " : "− ") + label
+                    ),
+                    h("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
+                      h("button", { onClick: () => handleAdjChange(key, adj[key] - 1), style: btnStyle }, "−"),
+                      h("input", {
+                        type: "number",
+                        min: "0",
+                        value: adj[key],
+                        onChange: e => handleAdjChange(key, +e.target.value || 0),
+                        style: { width: 50, textAlign: "center", fontSize: 13, padding: "4px" }
+                      }),
+                      h("button", { onClick: () => handleAdjChange(key, adj[key] + 1), style: btnStyle }, "+")
+                    ),
+                    h("div", { style: { fontSize: 11, color: "var(--color-text-tertiary)", width: 85, textAlign: "right" } },
+                      "= ฿" + formatCurrency(adj[key] * margins[key])
+                    )
+                  )
+                ),
+                h("div", { style: { borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 10, marginTop: 6, display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                  h("div", { style: { fontSize: 12, fontWeight: 500 } },
+                    h("span", null, "Total impact: "),
+                    h("span", { style: { color: totalImpact >= target ? "#3B6D11" : "#A32D2D" } },
+                      "฿" + formatCurrency(totalImpact) + " / ฿" + formatCurrency(target)
+                    )
+                  ),
+                  manualAdj ? h("button", {
+                    onClick: () => setManualAdj(null),
+                    style: { padding: "4px 10px", fontSize: 11, border: "1px solid var(--color-border-tertiary)", background: "white", borderRadius: 4, cursor: "pointer", color: "var(--color-text-secondary)" }
+                  }, "↻ Reset otomatis") : null
                 )
-              ) : null;
+              );
             })(),
             h(Section, { title: "Ringkasan akhir", accent: isDeficit ? "red" : "green" },
               h("div", { style: { fontSize: 12, fontWeight: 500, color: "var(--color-text-primary)", marginBottom: 10, paddingBottom: 8, borderBottom: "0.5px solid var(--color-border-tertiary)" } }, "Total peserta hadir"),

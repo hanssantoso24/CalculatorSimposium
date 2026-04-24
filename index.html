@@ -175,8 +175,8 @@
         // EXPENSES: Seminar Kit
         const semKitTotal = semKitN * semKitP;
 
-        // EXPENSES: Contingency (% of total income)
-        const contingencyExp = totalIncome * (contingencyPct / 100);
+        // EXPENSES: Contingency (% of cash income)
+        const contingencyExp = totalIncomeBeforeCustom * (contingencyPct / 100);
 
         // EXPENSES: Custom
         const customExpTotal = customExpenses.reduce((s, c) => s + c.total, 0) || 0;
@@ -184,8 +184,8 @@
         // TOTAL EXPENSES
         const totalExpenses = consumptionTotal + venueExp + cityTourTotal + semKitTotal + customExpTotal + contingencyExp;
 
-        // NILAI AKHIR
-        const nilaiAkhir = totalIncome - totalExpenses;
+        // NILAI AKHIR (Cash income - Expenses with KBRI benefits already deducted)
+        const nilaiAkhir = totalIncomeBeforeCustom - totalExpenses;
 
         // KEUNTUNGAN KHUSUS PANITIA
         const totalKeuntungan = keuntunganItems.reduce((s, c) => s + c.total, 0) || 0;
